@@ -1,0 +1,12 @@
+[
+    {
+      "title": "Certification 1",
+      "description": "Description for certification 1",
+      "imageUrl": "/path/to/image1.jpg"
+    },
+    {
+      "title": "Certification 2",
+      "description": "Description for certification 2",
+      "imageUrl": "/path/to/image2.jpg"
+    }
+  ]
