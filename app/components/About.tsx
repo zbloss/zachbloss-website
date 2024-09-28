@@ -5,8 +5,9 @@ export default function About() {
   return (
     <section id="about" className="py-16 px-6 bg-black bg-opacity-80">
       <div className="max-w-6xl mx-auto">
-        <h2 className="text-3xl md:text-4xl font-bold text-white mb-12 text-left">
-          Solving problems with data<br />daily
+        <h2 className="text-4xl md:text-7xl font-bold text-white mb-12 text-left">
+          Solving problems <br />
+          with data daily
         </h2>
         <div className="grid md:grid-cols-3 gap-8">
           <motion.div

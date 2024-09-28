@@ -32,8 +32,6 @@ export function Navigation() {
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
-  console.log("isScrolled:", isScrolled);
-
   return (
     <>
       <div className="hidden md:block absolute top-6 right-6 z-50">
@@ -149,10 +147,10 @@ export function Navigation() {
               </li>
               <li>
                 <Link
-                  href="#portfolio"
+                  href="#projects"
                   className="hover:text-purple-400 transition-colors"
                 >
-                  Portfolio
+                  Projects
                 </Link>
               </li>
               <li>

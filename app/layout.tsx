@@ -9,6 +9,12 @@ export const metadata: Metadata = GenerateMetadata({
   title: "Zach Bloss Portfolio",
   description:
     "Explore the portfolio of Zach Bloss, showcasing projects, skills, certificates, awards and professional experience in Data Science and Artifical Intelligence.",
+  keywords: [
+    "Zach Bloss",
+    "Who's Who in America",
+    "Zachary Bloss",
+    "MLOps Specialist",
+  ],
 });
 
 export default function RootLayout({

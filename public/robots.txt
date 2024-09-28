@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://shortlister.ai/sitemap.xml
+Sitemap: https://zachbloss.com/sitemap.xml

@@ -3,7 +3,8 @@
 import Image from "next/image";
 import { Navigation } from "@/app/components/Navigation";
 import About from "@/app/components/About";
-import Certifications from "./components/Certifications";
+import Certifications from "@/app/components/Certifications";
+import Projects from "@/app/components/Projects";
 
 export default function LandingPage() {
   return (
@@ -32,17 +33,18 @@ export default function LandingPage() {
         {/* Main Content */}
         <main className="flex-grow flex items-center justify-center px-6">
           <div className="text-center">
-            <h1 className="text-4xl md:text-6xl mb-4 font-bold">
+            <h1 className="text-4xl md:text-8xl mb-4 font-bold">
               Zachary <span className="font-medium text-purple-400">Bloss</span>
             </h1>
-            <p className="text-xl md:text-2xl mb-8">
+            <p className="text-xl md:text-3xl mb-8">
               AI, MLOps, and Full-Stack Development
             </p>
           </div>
         </main>
       </div>
-      <div className="relative z-1 min-h-screen flex flex-col">
+      <div className="relative z-1 min-h-screen flex flex-col md:mx-40">
         <About />
+        <Projects />
         <Certifications />
       </div>
     </div>

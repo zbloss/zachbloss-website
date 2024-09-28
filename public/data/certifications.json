@@ -1,12 +1,26 @@
 [
-    {
-      "title": "Certification 1",
-      "description": "Description for certification 1",
-      "imageUrl": "/path/to/image1.jpg"
-    },
-    {
-      "title": "Certification 2",
-      "description": "Description for certification 2",
-      "imageUrl": "/path/to/image2.jpg"
-    }
-  ]
+  {
+    "title": "Who's Who in America",
+    "description": "Inducted as a Member of the 2024 Class of Marquis Who's Who in America.",
+    "imageUrl": "/images/certifications/marquis-whos-who.png",
+    "link": "https://www.24-7pressrelease.com/press-release-service/514729"
+  },
+  {
+    "title": "AWS Certified Solutions Architect - Associate",
+    "description": "Earners of this certification able to strategically design well-architected distributed systems that are scalable, resilient, efficient, and fault-tolerant.",
+    "imageUrl": "/images/certifications/aws-solutions-architect.png",
+    "link": "https://www.credly.com/badges/bebf5c95-7450-41cd-b2c0-3b82c945bd26/public_url"
+  },
+  {
+    "title": "AWS Certified Machine Learning",
+    "description": "Earners of this certification have demonstrated ability to build, train, tune, and deploy ML models using the AWS Cloud.",
+    "imageUrl": "/images/certifications/aws-ml-specialty.png",
+    "link": "https://www.credly.com/badges/e7dc7106-3184-49a7-a0a5-41e222251b79/public_url"
+  },
+  {
+    "title": "Certified Kubernetes Application Developer",
+    "description": "Earners of this designation demonstrate the skills to perform as a Kubernetes Application Developer, defining resources and using core primitives to build, monitor, and troubleshoot scalable applications",
+    "imageUrl": "/images/certifications/ckad.png",
+    "link": "https://www.credly.com/badges/6fbc72f2-1531-4e32-be73-be7af6e1bb28/public_url"
+  }
+]
