@@ -12,12 +12,6 @@
     "link": "https://github.com/snowflakedb/snowflake-ml-python"
   },
   {
-    "title": "Extinct Sounds",
-    "description": "Wordle-like game where you have to guess the extinct sound by its name. This was a fun project to hone my Web3 development skills. The game is deployed on the Ethereum blockchain and built with Solidity, Python, and Next.js.",
-    "imageUrl": "/images/projects/extinct-sounds.ico",
-    "link": "https://github.com/zbloss/extinct-sounds"
-  },
-  {
     "title": "It's What Was Said",
     "description": "My LLC that focusses on building micro-SaaS solutions for small businesses.",
     "imageUrl": "/images/its-what-was-said.png",
@@ -28,5 +22,11 @@
     "description": "Micro-SaaS that enhances employee experience by sending personalized greeting cards for holidays, anniversaries, and special occasions. The card content is generated using AI based on information provided by the employer.",
     "imageUrl": "/images/projects/scribblesend.png",
     "link": "https://scribblesend.com"
+  },
+  {
+    "title": "Extinct Sounds",
+    "description": "Wordle-like game where you have to guess the extinct sound by its name. This was a fun project to hone my Web3 development skills. The game is deployed on the Ethereum blockchain and built with Solidity, Python, and Next.js.",
+    "imageUrl": "/images/projects/extinct-sounds.ico",
+    "link": "https://github.com/zbloss/extinct-sounds"
   }
 ]
