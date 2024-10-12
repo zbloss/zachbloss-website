@@ -1,5 +1,11 @@
 [
   {
+    "title": "ShortLister.ai",
+    "description": "ShortLister.ai is an AI-powered job-interview automation product. ShortLister.ai interviews candidates for you asynchronously, providing you data on how well candidates answered tough questions, where their strengths and weaknesses are, and how good of a fit they would be for your role.",
+    "imageUrl": "/images/projects/shortlister-ai.png",
+    "link": "https://shortlister.ai"
+  },
+  {
     "title": "A Parameter-Free Classification Method with Compressors",
     "description": "The paper introduces a new method for text classification that is simpler and cheaper than traditional deep learning methods. It combines data compression with a nearest neighbor classifier and achieves competitive results even with limited data and on unseen data.",
     "imageUrl": "/images/projects/npc-gzip.png",
