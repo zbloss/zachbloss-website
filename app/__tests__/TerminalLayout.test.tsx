@@ -61,8 +61,4 @@ describe("TerminalLayout", () => {
     expect(terminal).toHaveClass("font-mono");
   });
 
-  it("renders without animation libraries", () => {
-    // The actual check is done at build/typecheck level
-    // This verifies the component renders successfully without animation deps
-  });
 });

@@ -89,3 +89,9 @@
   animation: bootReveal 0.5s ease-out forwards;
   opacity: 0;
 }
+
+/* Staggered boot sequence delays */
+.boot-delay-0 { animation-delay: 0s; }
+.boot-delay-1 { animation-delay: 0.3s; }
+.boot-delay-2 { animation-delay: 0.6s; }
+.boot-delay-3 { animation-delay: 0.9s; }
