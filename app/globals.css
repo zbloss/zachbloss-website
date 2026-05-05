@@ -69,6 +69,23 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-mono;
   }
+}
+
+/* Boot Sequence CSS transition animation */
+@keyframes bootReveal {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.boot-reveal {
+  animation: bootReveal 0.5s ease-out forwards;
+  opacity: 0;
 }
