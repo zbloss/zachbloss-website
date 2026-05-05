@@ -43,9 +43,7 @@ export function resolveCommand(input: string): CommandResult {
 
   const cmd = trimmed.slice(1).toLowerCase();
 
-  const found = KNOWN_COMMANDS.find(
-    (c) => c.command.slice(1).toLowerCase() === cmd
-  );
+  const found = KNOWN_COMMANDS.find((c) => c.command.slice(1).toLowerCase() === cmd);
 
   if (!found) {
     return { type: "error", message: `Unknown command: ${trimmed}` };

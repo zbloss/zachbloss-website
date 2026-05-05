@@ -39,7 +39,6 @@ export function TerminalLayout({ children }: TerminalLayoutProps) {
         break;
 
       case "clear":
-        // /clear navigates to the /clear route which renders an empty body.
         setHistoryIndex(-1);
         router.push("/clear");
         break;
