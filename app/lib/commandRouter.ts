@@ -35,7 +35,7 @@ export const KNOWN_COMMANDS: CommandDefinition[] = [
 export function resolveCommand(input: string): CommandResult {
   const trimmed = input.trim();
 
-  // Plain text (no / prefix) or empty → stub
+  // Plain text (no / prefix) or empty string → stub
   if (!trimmed.startsWith("/")) {
     return {
       type: "stub",

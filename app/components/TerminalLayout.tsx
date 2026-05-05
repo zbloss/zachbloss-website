@@ -11,15 +11,11 @@ interface TerminalLayoutProps {
 
 export function TerminalLayout({ children }: TerminalLayoutProps) {
   const router = useRouter();
-  // Command history for the session.
   const [history, setHistory] = useState<string[]>([]);
-  // Current browsing position in history (−1 = at prompt).
   const [historyIndex, setHistoryIndex] = useState(-1);
-  // Error or stub message to show in the TerminalBody.
   const [message, setMessage] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Keep focus on the input after route changes.
   useEffect(() => {
     inputRef.current?.focus();
   });
@@ -27,7 +23,7 @@ export function TerminalLayout({ children }: TerminalLayoutProps) {
   const handleCommand = useCallback((command: string) => {
     const result = resolveCommand(command);
 
-    // Add to history (unless it's an error/stub message).
+    // Don't add error or stub commands to history.
     if (result.type !== "error" && result.type !== "stub") {
       setHistory((prev) => [...prev, command]);
     }
@@ -55,12 +51,10 @@ export function TerminalLayout({ children }: TerminalLayoutProps) {
 
   return (
     <div className="terminal-layout font-mono min-h-screen bg-black text-green-400 p-4 flex flex-col">
-      {/* Terminal Header */}
       <div className="border-t-2 border-lime-500">
         ┌ Terminal ── zachbloss.com ──┐
       </div>
 
-      {/* Terminal Body — scrollable output area */}
       <div role="log" className="overflow-y-auto flex-grow p-2 min-h-[calc(100vh-80px)]">
         {children}
         {message && (
@@ -70,7 +64,6 @@ export function TerminalLayout({ children }: TerminalLayoutProps) {
         )}
       </div>
 
-      {/* Terminal Prompt */}
       <div className="border-b-2 border-lime-500 p-2">
         <TerminalPrompt
           onCommand={handleCommand}

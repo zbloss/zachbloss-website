@@ -35,11 +35,12 @@ export function TerminalPrompt({
   const ref = inputRef || localInputRef;
 
   // The current text to display in the input.
-  const displayValue = typedValue
-    ? typedValue
-    : browseOffset > 0 && browseOffset <= history.length
-      ? history[history.length - browseOffset]
-      : "";
+  let displayValue = "";
+  if (typedValue) {
+    displayValue = typedValue;
+  } else if (browseOffset > 0 && browseOffset <= history.length) {
+    displayValue = history[history.length - browseOffset];
+  }
 
   function handleSubmit() {
     const trimmed = displayValue.trim();

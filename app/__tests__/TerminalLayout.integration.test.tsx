@@ -5,8 +5,8 @@ import "@testing-library/jest-dom";
 import { TerminalLayout } from "@/app/components/TerminalLayout";
 import { HelpOutput } from "@/app/components/HelpOutput";
 import { vi } from "vitest";
+import { useRouter } from "next/navigation";
 
-// We need to mock next/navigation more carefully for integration tests
 vi.mock("next/navigation", async () => {
   return {
     useRouter: vi.fn().mockReturnValue({
@@ -56,18 +56,15 @@ describe("TerminalLayout integration", () => {
     ).toBeInTheDocument();
   });
 
-  it("shows 'Terminal cleared' on /clear", () => {
+  it("resolves /clear to a clear action and pushes to /clear route", () => {
+    const { push } = vi.mocked(useRouter)();
     render(<TerminalLayout><div>content</div></TerminalLayout>);
     const input = screen.getByRole("textbox");
 
     fireEvent.change(input, { target: { value: "/clear" } });
     fireEvent.keyDown(input, { key: "Enter" });
 
-    // The /clear route renders a message
-    // Note: in tests, the router.push doesn't actually navigate,
-    // so the clear message won't appear unless we handle it in-place.
-    // This test verifies the command resolves to a clear action.
-    // The actual navigation is tested in the router mock.
+    expect(push).toHaveBeenCalledWith("/clear");
   });
 
   it("clears the input after submitting a command", () => {
