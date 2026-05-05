@@ -6,7 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "postinstall": "patch-package",
+    "sandcastle": "npx tsx ./.sandcastle/main.mts"
   },
   "dependencies": {
     "@next/third-parties": "^14.2.13",
@@ -26,14 +31,23 @@
     "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
+    "@ai-hero/sandcastle": "^0.5.7",
+    "@testing-library/jest-dom": "^6.4.0",
+    "@testing-library/react": "^14.3.0",
+    "@testing-library/user-event": "^14.5.0",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "@vitejs/plugin-react": "^4.3.0",
     "eslint": "^8",
     "eslint-config-next": "14.2.13",
+    "jsdom": "^24.1.0",
+    "langfuse": "^3.38.20",
+    "patch-package": "^8.0.1",
     "postcss": "^8",
     "shadcn-ui": "^0.9.1",
     "tailwindcss": "^3.4.1",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^1.6.0"
   }
 }
