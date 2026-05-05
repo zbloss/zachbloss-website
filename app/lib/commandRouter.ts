@@ -25,6 +25,9 @@ export interface CommandDefinition {
  */
 export const KNOWN_COMMANDS: CommandDefinition[] = [
   { command: "/help", description: "Show available commands", route: "/help" },
+  { command: "/about", description: "View background and skills", route: "/about" },
+  { command: "/projects", description: "View portfolio projects", route: "/projects" },
+  { command: "/certifications", description: "View professional certifications", route: "/certifications" },
   { command: "/clear", description: "Clear terminal output", action: "clear" },
 ];
 

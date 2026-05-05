@@ -12,6 +12,30 @@ describe("resolveCommand", () => {
       }
     });
 
+    it("resolves /about to the about route", () => {
+      const result = resolveCommand("/about");
+      expect(result.type).toBe("navigate");
+      if (result.type === "navigate") {
+        expect(result.route).toBe("/about");
+      }
+    });
+
+    it("resolves /projects to the projects route", () => {
+      const result = resolveCommand("/projects");
+      expect(result.type).toBe("navigate");
+      if (result.type === "navigate") {
+        expect(result.route).toBe("/projects");
+      }
+    });
+
+    it("resolves /certifications to the certifications route", () => {
+      const result = resolveCommand("/certifications");
+      expect(result.type).toBe("navigate");
+      if (result.type === "navigate") {
+        expect(result.route).toBe("/certifications");
+      }
+    });
+
     it("resolves /clear to the clear action", () => {
       const result = resolveCommand("/clear");
       expect(result.type).toBe("clear");
@@ -76,6 +100,30 @@ describe("KNOWN_COMMANDS", () => {
     expect(helpCmd).toBeDefined();
     expect(helpCmd?.description).toBeDefined();
     expect(helpCmd?.description).toBeTruthy();
+  });
+
+  it("includes /about with a description", () => {
+    const aboutCmd = KNOWN_COMMANDS.find(c => c.command === "/about");
+    expect(aboutCmd).toBeDefined();
+    expect(aboutCmd?.description).toBeDefined();
+    expect(aboutCmd?.description).toBeTruthy();
+    expect(aboutCmd?.route).toBe("/about");
+  });
+
+  it("includes /projects with a description", () => {
+    const projectsCmd = KNOWN_COMMANDS.find(c => c.command === "/projects");
+    expect(projectsCmd).toBeDefined();
+    expect(projectsCmd?.description).toBeDefined();
+    expect(projectsCmd?.description).toBeTruthy();
+    expect(projectsCmd?.route).toBe("/projects");
+  });
+
+  it("includes /certifications with a description", () => {
+    const certsCmd = KNOWN_COMMANDS.find(c => c.command === "/certifications");
+    expect(certsCmd).toBeDefined();
+    expect(certsCmd?.description).toBeDefined();
+    expect(certsCmd?.description).toBeTruthy();
+    expect(certsCmd?.route).toBe("/certifications");
   });
 
   it("includes /clear with a description", () => {

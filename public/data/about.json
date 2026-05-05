@@ -1,0 +1,14 @@
+[
+  {
+    "section": "Generative AI & LLMs",
+    "skills": ["LLM fine-tuning", "Prompt engineering", "RAG systems", "LangChain", "Transformers", "Model evaluation"]
+  },
+  {
+    "section": "Data Science",
+    "skills": ["Statistical modeling", "Predictive analytics", "Feature engineering", "A/B testing", "NLP", "Time series forecasting"]
+  },
+  {
+    "section": "Advanced Analytics",
+    "skills": ["MLOps", "CI/CD for ML", "Cloud architecture", "Kubernetes", "Data pipelines", "Visualization"]
+  }
+]
