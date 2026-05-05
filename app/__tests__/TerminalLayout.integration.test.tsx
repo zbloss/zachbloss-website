@@ -1,6 +1,6 @@
 /// <reference types="vitest/globals" />
 
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, act } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import { TerminalLayout } from "@/app/components/TerminalLayout";
 import { HelpOutput } from "@/app/components/HelpOutput";
@@ -22,6 +22,19 @@ vi.mock("next/navigation", async () => {
   };
 });
 
+// Mock IntentResolver to return null for untrusted input (below threshold)
+vi.mock("@/app/lib/intentResolver", () => ({
+  getIntentResolver: vi.fn(() => ({
+    isReady: () => true,
+  })),
+  resolve: vi.fn(async () => null),
+}));
+
+// Mock AssistantStatus to always show "ready"
+vi.mock("@/app/components/AssistantStatus", () => ({
+  AssistantStatus: () => <span>assistant ready</span>,
+}));
+
 describe("TerminalLayout integration", () => {
   it("renders TerminalPrompt with the input field and prompt character", () => {
     render(<TerminalLayout><div>content</div></TerminalLayout>);
@@ -34,25 +47,36 @@ describe("TerminalLayout integration", () => {
     expect(screen.getByText(/Available Commands/)).toBeInTheDocument();
   });
 
-  it("renders error message for unknown command", () => {
+  it("routes unknown /command through IntentResolver", async () => {
     render(<TerminalLayout><div>content</div></TerminalLayout>);
     const input = screen.getByRole("textbox");
 
     fireEvent.change(input, { target: { value: "/foobar" } });
     fireEvent.keyDown(input, { key: "Enter" });
 
-    expect(screen.getByText(/Unknown command: \/foobar/)).toBeInTheDocument();
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 50));
+    });
+
+    // Unknown command goes through IntentResolver
+    expect(
+      screen.getByText(/I'm not sure what you mean/)
+    ).toBeInTheDocument();
   });
 
-  it("renders stub message for plain text input", () => {
+  it("renders stub message for plain text input", async () => {
     render(<TerminalLayout><div>content</div></TerminalLayout>);
     const input = screen.getByRole("textbox");
 
     fireEvent.change(input, { target: { value: "hello world" } });
     fireEvent.keyDown(input, { key: "Enter" });
 
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 50));
+    });
+
     expect(
-      screen.getByText(/Plain text input handling coming soon/)
+      screen.getByText(/I'm not sure what you mean/)
     ).toBeInTheDocument();
   });
 
@@ -75,5 +99,10 @@ describe("TerminalLayout integration", () => {
     fireEvent.keyDown(input, { key: "Enter" });
 
     expect(input).toHaveValue("");
+  });
+
+  it("shows assistant status indicator", () => {
+    render(<TerminalLayout><div>content</div></TerminalLayout>);
+    expect(screen.getByText(/assistant ready|loading assistant/)).toBeInTheDocument();
   });
 });
