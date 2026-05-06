@@ -48,6 +48,14 @@ describe("resolveCommand", () => {
       }
     });
 
+    it("resolves /contact to the contact route", () => {
+      const result = resolveCommand("/contact");
+      expect(result.type).toBe("navigate");
+      if (result.type === "navigate") {
+        expect(result.route).toBe("/contact");
+      }
+    });
+
     it("resolves /clear to the clear action", () => {
       const result = resolveCommand("/clear");
       expect(result.type).toBe("clear");
@@ -152,6 +160,14 @@ describe("KNOWN_COMMANDS", () => {
     expect(latestCmd?.description).toBeTruthy();
     expect(latestCmd?.route).toBe("/latest");
   });
+
+  it("includes /contact with a description", () => {
+    const contactCmd = KNOWN_COMMANDS.find(c => c.command === "/contact");
+    expect(contactCmd).toBeDefined();
+    expect(contactCmd?.description).toBeDefined();
+    expect(contactCmd?.description).toBeTruthy();
+    expect(contactCmd?.route).toBe("/contact");
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -165,6 +181,7 @@ describe("resolveCommandAsync", () => {
     { command: "/about", description: "View background and skills", route: "/about" },
     { command: "/projects", description: "View portfolio projects", route: "/projects" },
     { command: "/certifications", description: "View professional certifications", route: "/certifications" },
+    { command: "/contact", description: "Get in touch via message form", route: "/contact" },
     { command: "/clear", description: "Clear terminal output", action: "clear" as const },
   ];
 

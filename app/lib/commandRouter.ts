@@ -25,6 +25,7 @@ export const KNOWN_COMMANDS: CommandDefinition[] = [
   { command: "/certifications", description: "View professional certifications", route: "/certifications" },
   { command: "/blog", description: "View blog posts", route: "/blog" },
   { command: "/latest", description: "View recent commits", route: "/latest" },
+  { command: "/contact", description: "Get in touch via message form", route: "/contact" },
   { command: "/clear", description: "Clear terminal output", action: "clear" },
 ];
 
