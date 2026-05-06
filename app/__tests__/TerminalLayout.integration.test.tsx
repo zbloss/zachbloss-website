@@ -26,6 +26,7 @@ vi.mock("next/navigation", async () => {
 vi.mock("@/app/lib/intentResolver", () => ({
   getIntentResolver: vi.fn(() => ({
     isReady: () => true,
+    resolve: vi.fn(async () => null),
   })),
   resolve: vi.fn(async () => null),
 }));

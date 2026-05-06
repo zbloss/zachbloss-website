@@ -9,15 +9,11 @@ export type CommandResult =
   | { type: "navigate"; route: string }
   | { type: "clear" }
   | { type: "error"; message: string }
-  | { type: "stub"; message: string };
+  | { type: "stub"; message: string }
+  | { type: "suggest"; command: string; message: string };
 
-/** Definition of a known command — used by HelpOutput and routing. */
-export interface CommandDefinition {
-  command: string;
-  description: string;
-  route?: string;
-  action?: "clear";
-}
+export type { CommandDefinition } from "./commandTypes";
+import type { CommandDefinition } from "./commandTypes";
 
 /**
  * All known commands the terminal recognises.
@@ -64,5 +60,95 @@ export function resolveCommand(input: string): CommandResult {
   return {
     type: "error",
     message: `Unknown command: ${trimmed}`,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Async resolution — wires IntentResolver into CommandRouter
+// ---------------------------------------------------------------------------
+
+const HIGH_CONFIDENCE_THRESHOLD = 0.85;
+const MID_CONFIDENCE_THRESHOLD = 0.50;
+
+/**
+ * Resolve input asynchronously, wiring IntentResolver for plain text
+ * and unknown commands.
+ *
+ * Flow:
+ *   1. Known `/` commands → direct result (sync)
+ *   2. Plain text / unknown `/` → IntentResolver
+ *   3. Confidence ≥ 0.85 → navigate
+ *   4. Confidence 0.50–0.84 → suggest + await confirmation
+ *   5. Confidence < 0.50 → try /help message
+ */
+export async function resolveCommandAsync(
+  input: string,
+  commands: CommandDefinition[],
+): Promise<CommandResult> {
+  const trimmed = input.trim();
+
+  // Fast path: known commands resolve synchronously
+  if (trimmed.startsWith("/")) {
+    const cmd = trimmed.slice(1).toLowerCase();
+    const found = commands.find(
+      (c) => c.command.slice(1).toLowerCase() === cmd,
+    );
+    if (found) {
+      if (found.action === "clear") {
+        return { type: "clear" };
+      }
+      if (found.route) {
+        return { type: "navigate", route: found.route };
+      }
+    }
+  }
+
+  // Plain text or unknown /command → IntentResolver
+  const { getIntentResolver } = await import("@/app/lib/intentResolver");
+  const resolver = getIntentResolver(commands);
+
+  if (!resolver.isReady()) {
+    // Model not ready yet — fall back to stub
+    return {
+      type: "stub",
+      message:
+        "Assistant is loading… try /help to see available commands",
+    };
+  }
+
+  const intentResult = await resolver.resolve(trimmed);
+
+  if (intentResult) {
+    if (intentResult.confidence >= HIGH_CONFIDENCE_THRESHOLD) {
+      // Auto-navigate to matched command
+      const matchedCmd = commands.find(
+        (c) => c.command === intentResult.command,
+      );
+      if (matchedCmd) {
+        if (matchedCmd.action === "clear") {
+          return { type: "clear" };
+        }
+        if (matchedCmd.route) {
+          return { type: "navigate", route: matchedCmd.route };
+        }
+      }
+      // Fallback: navigate by command name
+      return { type: "navigate", route: intentResult.command };
+    }
+
+    if (intentResult.confidence >= MID_CONFIDENCE_THRESHOLD) {
+      // Suggest and await confirmation
+      return {
+        type: "suggest",
+        command: intentResult.command,
+        message: `I think you mean ${intentResult.command} (confidence: ${intentResult.confidence.toFixed(2)}). Type it to confirm.`,
+      };
+    }
+  }
+
+  // Below threshold — suggest /help
+  return {
+    type: "stub",
+    message: "I'm not sure what you mean — try /help to see available commands",
   };
 }

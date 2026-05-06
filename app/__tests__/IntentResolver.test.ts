@@ -311,15 +311,15 @@ describe("low-confidence matching", () => {
     expect(result).toBeNull();
   });
 
-  it("unrelated input with non-zero vector returns confidence < 0.50", async () => {
+  it("unrelated input with non-zero vector returns best match with low confidence", async () => {
     const resolver = new IntentResolver(commands, 0);
 
-    const projectVec = [0.8, 0.4, 0.2, 0.1, 0.3];
-    const aboutVec = [0.2, 0.8, 0.4, 0.2, 0.1];
-    const helpVec = [0.3, 0.2, 0.8, 0.3, 0.2];
+    const projectVec = [0.9, 0.1, 0.1, 0.15, 0.1];
+    const aboutVec = [0.1, 0.9, 0.1, 0.1, 0.1];
+    const helpVec = [0.1, 0.1, 0.9, 0.1, 0.1];
 
-    // Input: somewhat random, low similarity to all
-    const inputVec = [0.2, 0.3, 0.1, 0.8, 0.1];
+    // Input: very different from all commands
+    const inputVec = [0.05, 0.05, 0.05, 0.9, 0.05];
 
     const mockCmdEmbeddings = new Map([
       ["/projects", projectVec],
@@ -330,8 +330,9 @@ describe("low-confidence matching", () => {
     resolver.setMockEmbeddings(() => inputVec, mockCmdEmbeddings);
 
     const result = await resolver.resolve("what is the weather like today");
-    // Should return null (below 0.85 threshold)
-    expect(result).toBeNull();
+    // Returns the best match (not null) but with low confidence (< 0.50)
+    expect(result).not.toBeNull();
+    expect(result?.confidence).toBeLessThan(0.50);
   });
 });
 

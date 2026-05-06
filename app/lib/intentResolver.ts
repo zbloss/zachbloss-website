@@ -8,7 +8,7 @@
  * Command embeddings are pre-computed at init time (not per query).
  */
 
-import type { CommandDefinition } from "@/app/lib/commandRouter";
+import type { CommandDefinition } from "./commandTypes";
 
 // ---------------------------------------------------------------------------
 // Cosine similarity utility
@@ -78,6 +78,7 @@ export interface IntentResult {
 const MODEL_ID = "Xenova/all-MiniLM-L6-v2";
 const EMBEDDING_DIM = 384;
 const DEFAULT_MODEL_LOAD_DELAY_MS = 3000;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const HIGH_CONFIDENCE_THRESHOLD = 0.85;
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const LOW_CONFIDENCE_THRESHOLD = 0.50;
@@ -123,7 +124,13 @@ export class IntentResolver {
 
   /**
    * Resolve user input to the best-matching command.
-   * Returns null if no match exceeds the high-confidence threshold.
+   * Returns the command with the highest confidence score,
+   * or null if no meaningful match exists (all confidences are 0).
+   *
+   * Confidence thresholds are applied by the caller (e.g. resolveCommandAsync):
+   *   ≥ 0.85 → auto-navigate
+   *   0.50–0.84 → suggest
+   *   < 0.50 → try /help
    */
   async resolve(input: string): Promise<IntentResult | null> {
     // Wait for model if not ready yet
@@ -139,7 +146,7 @@ export class IntentResolver {
       const cmdEmbedding = this.getCommandEmbedding(cmd.command, cmd.description);
       const confidence = cosineSimilarity(inputEmbedding, cmdEmbedding);
 
-      if (confidence > HIGH_CONFIDENCE_THRESHOLD && (!bestCommand || confidence > bestCommand.confidence)) {
+      if (confidence > 0 && (!bestCommand || confidence > bestCommand.confidence)) {
         bestCommand = { command: cmd.command, confidence };
       }
     }
