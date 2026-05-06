@@ -19,7 +19,7 @@ export function TerminalPrompt({
   historyIndex,
   inputRef,
 }: TerminalPromptProps) {
-  // When historyIndex changes externally (parent updates), reset browsing.
+  // Reset browsing mode when historyIndex changes externally.
   useEffect(() => {
     if (historyIndex >= 0) {
       setBrowseOffset(0);
@@ -27,14 +27,12 @@ export function TerminalPrompt({
     }
   }, [historyIndex]);
 
-  // Browse offset: 0 = at prompt, 1 = one step up, etc.
   const [browseOffset, setBrowseOffset] = useState(0);
-  // Value the user has typed (overrides history browsing).
   const [typedValue, setTypedValue] = useState("");
   const localInputRef = useRef<HTMLInputElement>(null);
   const ref = inputRef || localInputRef;
 
-  // The current text to display in the input.
+  // The text currently displayed in the input field.
   let displayValue = "";
   if (typedValue) {
     displayValue = typedValue;
@@ -60,7 +58,7 @@ export function TerminalPrompt({
 
     if (e.key === "ArrowUp") {
       e.preventDefault();
-      setTypedValue(""); // exit typed mode when browsing
+      setTypedValue("");
       setBrowseOffset((prev) => Math.min(prev + 1, history.length));
       return;
     }
@@ -84,7 +82,7 @@ export function TerminalPrompt({
         value={displayValue}
         onChange={(e) => {
           setTypedValue(e.target.value);
-          setBrowseOffset(0); // exit browsing when typing
+          setBrowseOffset(0);
         }}
         onKeyDown={handleKeyDown}
         className="bg-transparent outline-none text-green-400 flex-grow font-mono placeholder-gray-600"

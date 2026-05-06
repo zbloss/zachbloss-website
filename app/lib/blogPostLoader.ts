@@ -42,8 +42,8 @@ export function parseFrontmatter(md: string): BlogPost {
 }
 
 /**
- * Read all posts from the posts directory at build time.
- * Returns posts sorted by date descending (newest first).
+ * Sort posts by date descending (newest first).
+ * Called by `loadBlogPosts` after reading all markdown files.
  */
 export function readPosts(posts: BlogPost[]): BlogPost[] {
   return [...posts].sort((a, b) => {

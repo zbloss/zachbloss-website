@@ -150,7 +150,7 @@ export class IntentResolver {
     return bestCommand;
   }
 
-  /** Get embedding for input text — uses mock if injected, falls back to model/word-bag. */
+  /** Get embedding for input text — mock, model, or word-bag fallback. */
   private async getInputEmbedding(text: string): Promise<number[]> {
     if (this.mockInputEmbedding) {
       return this.mockInputEmbedding(text);
@@ -161,7 +161,7 @@ export class IntentResolver {
     return wordBagEmbedding(text, EMBEDDING_DIM);
   }
 
-  /** Get cached command embedding — uses mock if injected. */
+  /** Get cached command embedding — mock if injected, model cache, or word-bag fallback. */
   private getCommandEmbedding(command: string, description: string): number[] {
     if (this.mockCommandEmbeddings && this.mockCommandEmbeddings.has(command)) {
       return this.mockCommandEmbeddings.get(command)!;
@@ -171,7 +171,6 @@ export class IntentResolver {
 
   /** Use Transformers.js pipeline if available. */
   private async modelEmbedding(text: string): Promise<number[]> {
-    // Dynamic import — only loads in browser context
     const { pipeline } = await import("@xenova/transformers");
     try {
       const embedder = await pipeline("feature-extraction", MODEL_ID);
@@ -179,7 +178,6 @@ export class IntentResolver {
       const data = output.data as number[];
       return Array.from(data) as number[];
     } catch {
-      // If model fails, fall back to word-bag
       return wordBagEmbedding(text, EMBEDDING_DIM);
     }
   }
@@ -189,7 +187,7 @@ export class IntentResolver {
    * pre-compute embeddings for all commands.
    */
   private async initModel(): Promise<void> {
-    // Low-priority background load — schedule after page load
+    // Schedule model loading after a delay to avoid blocking page render
     await new Promise((resolve) => setTimeout(resolve, this.loadDelay));
 
     try {
