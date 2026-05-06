@@ -6,14 +6,13 @@ const nextConfig = {
     remotePatterns: [],
   },
   webpack(config) {
-    // Exclude native Node.js modules — transformers.js uses WASM in the browser.
-    // onnxruntime-node provides native binaries that only work in Node, not in
-    // webpack/browser bundles. We also exclude the node-specific env resolution.
+    // Stub out onnxruntime-node in all bundles. The native binary can't be
+    // parsed by webpack (server) or executed in the browser (client). This
+    // project only uses onnxruntime-web (WASM) via @xenova/transformers.
     config.resolve.alias = {
       ...config.resolve.alias,
       "onnxruntime-node": false,
     };
-    config.externals = [...(config.externals || []), "onnxruntime-node"];
     return config;
   },
 };

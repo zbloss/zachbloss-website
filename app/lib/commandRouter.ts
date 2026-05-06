@@ -19,6 +19,7 @@ export type CommandResult =
  * Each entry maps to a URL route (or a special action).
  */
 export const KNOWN_COMMANDS: CommandDefinition[] = [
+  { command: "/home", description: "Return to the home page", route: "/" },
   { command: "/help", description: "Show available commands", route: "/help" },
   { command: "/about", description: "View background and skills", route: "/about" },
   { command: "/projects", description: "View portfolio projects", route: "/projects" },
