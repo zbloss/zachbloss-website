@@ -40,6 +40,14 @@ describe("resolveCommand", () => {
       }
     });
 
+    it("resolves /latest to the latest route", () => {
+      const result = resolveCommand("/latest");
+      expect(result.type).toBe("navigate");
+      if (result.type === "navigate") {
+        expect(result.route).toBe("/latest");
+      }
+    });
+
     it("resolves /clear to the clear action", () => {
       const result = resolveCommand("/clear");
       expect(result.type).toBe("clear");
@@ -135,6 +143,14 @@ describe("KNOWN_COMMANDS", () => {
     expect(clearCmd).toBeDefined();
     expect(clearCmd?.description).toBeDefined();
     expect(clearCmd?.description).toBeTruthy();
+  });
+
+  it("includes /latest with a description", () => {
+    const latestCmd = KNOWN_COMMANDS.find(c => c.command === "/latest");
+    expect(latestCmd).toBeDefined();
+    expect(latestCmd?.description).toBeDefined();
+    expect(latestCmd?.description).toBeTruthy();
+    expect(latestCmd?.route).toBe("/latest");
   });
 });
 
