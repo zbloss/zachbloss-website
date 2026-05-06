@@ -78,10 +78,6 @@ export interface IntentResult {
 const MODEL_ID = "Xenova/all-MiniLM-L6-v2";
 const EMBEDDING_DIM = 384;
 const DEFAULT_MODEL_LOAD_DELAY_MS = 3000;
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const HIGH_CONFIDENCE_THRESHOLD = 0.85;
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const LOW_CONFIDENCE_THRESHOLD = 0.50;
 
 /** Override model load delay — set via vitest globals in tests. */
 const MODEL_LOAD_DELAY_MS = typeof window !== "undefined"
@@ -222,11 +218,6 @@ export class IntentResolver {
     this.modelPromise = null;
   }
 
-  /** Get cached embedding for a text string. */
-  private getCachedEmbedding(text: string): number[] {
-    // Simple caching via word-bag for non-command text
-    return wordBagEmbedding(text, EMBEDDING_DIM);
-  }
 }
 
 // ---------------------------------------------------------------------------

@@ -12,7 +12,6 @@ export type CommandResult =
   | { type: "stub"; message: string }
   | { type: "suggest"; command: string; message: string };
 
-export type { CommandDefinition } from "./commandTypes";
 import type { CommandDefinition } from "./commandTypes";
 
 /**
@@ -71,6 +70,20 @@ const HIGH_CONFIDENCE_THRESHOLD = 0.85;
 const MID_CONFIDENCE_THRESHOLD = 0.50;
 
 /**
+ * Resolve a CommandDefinition to a CommandResult based on its action/route.
+ */
+function commandToResult(cmd: CommandDefinition): CommandResult {
+  if (cmd.action === "clear") {
+    return { type: "clear" };
+  }
+  if (cmd.route) {
+    return { type: "navigate", route: cmd.route };
+  }
+  // Should not happen for well-formed commands
+  return { type: "navigate", route: cmd.command };
+}
+
+/**
  * Resolve input asynchronously, wiring IntentResolver for plain text
  * and unknown commands.
  *
@@ -94,12 +107,7 @@ export async function resolveCommandAsync(
       (c) => c.command.slice(1).toLowerCase() === cmd,
     );
     if (found) {
-      if (found.action === "clear") {
-        return { type: "clear" };
-      }
-      if (found.route) {
-        return { type: "navigate", route: found.route };
-      }
+      return commandToResult(found);
     }
   }
 
@@ -108,7 +116,6 @@ export async function resolveCommandAsync(
   const resolver = getIntentResolver(commands);
 
   if (!resolver.isReady()) {
-    // Model not ready yet — fall back to stub
     return {
       type: "stub",
       message:
@@ -120,24 +127,13 @@ export async function resolveCommandAsync(
 
   if (intentResult) {
     if (intentResult.confidence >= HIGH_CONFIDENCE_THRESHOLD) {
-      // Auto-navigate to matched command
       const matchedCmd = commands.find(
         (c) => c.command === intentResult.command,
       );
-      if (matchedCmd) {
-        if (matchedCmd.action === "clear") {
-          return { type: "clear" };
-        }
-        if (matchedCmd.route) {
-          return { type: "navigate", route: matchedCmd.route };
-        }
-      }
-      // Fallback: navigate by command name
-      return { type: "navigate", route: intentResult.command };
+      return matchedCmd ? commandToResult(matchedCmd) : { type: "navigate", route: intentResult.command };
     }
 
     if (intentResult.confidence >= MID_CONFIDENCE_THRESHOLD) {
-      // Suggest and await confirmation
       return {
         type: "suggest",
         command: intentResult.command,
@@ -146,7 +142,6 @@ export async function resolveCommandAsync(
     }
   }
 
-  // Below threshold — suggest /help
   return {
     type: "stub",
     message: "I'm not sure what you mean — try /help to see available commands",
