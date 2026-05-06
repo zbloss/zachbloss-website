@@ -117,9 +117,9 @@ describe("ContactForm", () => {
     });
   });
 
-  it("renders in a styled container with ASCII borders", () => {
-    const { container } = render(<ContactForm />);
-    const el = container.querySelector(".contact-output");
-    expect(el).toBeInTheDocument();
+  it("renders ASCII box borders around the form", () => {
+    render(<ContactForm />);
+    expect(screen.getByText(/Contact ─/)).toBeInTheDocument();
+    expect(screen.getByText(/└─/)).toBeInTheDocument();
   });
 });

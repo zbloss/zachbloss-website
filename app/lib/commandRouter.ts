@@ -123,26 +123,24 @@ export async function resolveCommandAsync(
 
   const intentResult = await resolver.resolve(trimmed);
 
-  if (!intentResult) {
-    return { type: "stub", message: NO_MATCH_MESSAGE };
-  }
-
-  if (intentResult.confidence >= HIGH_CONFIDENCE_THRESHOLD) {
-    const matchedCmd = commands.find(
-      (c) => c.command === intentResult.command,
-    );
-    if (matchedCmd) {
-      return commandToResult(matchedCmd);
+  if (intentResult) {
+    if (intentResult.confidence >= HIGH_CONFIDENCE_THRESHOLD) {
+      const matchedCmd = commands.find(
+        (c) => c.command === intentResult.command,
+      );
+      if (matchedCmd) {
+        return commandToResult(matchedCmd);
+      }
+      return { type: "navigate", route: intentResult.command };
     }
-    return { type: "navigate", route: intentResult.command };
-  }
 
-  if (intentResult.confidence >= MID_CONFIDENCE_THRESHOLD) {
-    return {
-      type: "suggest",
-      command: intentResult.command,
-      message: `I think you mean ${intentResult.command} (confidence: ${intentResult.confidence.toFixed(2)}). Type it to confirm.`,
-    };
+    if (intentResult.confidence >= MID_CONFIDENCE_THRESHOLD) {
+      return {
+        type: "suggest",
+        command: intentResult.command,
+        message: `I think you mean ${intentResult.command} (confidence: ${intentResult.confidence.toFixed(2)}). Type it to confirm.`,
+      };
+    }
   }
 
   return { type: "stub", message: NO_MATCH_MESSAGE };

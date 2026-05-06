@@ -3,6 +3,44 @@
 import { useState } from "react";
 import Link from "next/link";
 
+// ---------------------------------------------------------------------------
+// Shared pieces — reduce repetition across render paths
+// ---------------------------------------------------------------------------
+
+const BOX_HEADER = "┌ Contact ──────────────────────────────┐";
+const BOX_FOOTER = "└─────────────────────────────────────────┘";
+const BOX_CLASS = "text-purple-400 font-bold text-lg";
+const FOOTER_CLASS = "text-gray-500 pl-2";
+const LINK_CLASS =
+  "text-lime-400 font-bold hover:text-lime-300 underline underline-offset-2 block";
+
+function ContactLinks() {
+  return (
+    <div className="pl-2 space-y-1">
+      <Link
+        href="https://github.com/zbloss"
+        target="_blank"
+        rel="noopener noreferrer"
+        className={LINK_CLASS}
+      >
+        ─ GitHub
+      </Link>
+      <Link
+        href="https://linkedin.com/in/zbloss"
+        target="_blank"
+        rel="noopener noreferrer"
+        className={LINK_CLASS}
+      >
+        ─ LinkedIn
+      </Link>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Component
+// ---------------------------------------------------------------------------
+
 interface FormState {
   name: string;
   email: string;
@@ -10,6 +48,9 @@ interface FormState {
 }
 
 type SubmissionState = "idle" | "submitting" | "success" | "fallback";
+
+const SUCCESS_MESSAGE =
+  "✓ Thank you for your message! I'll get back to you soon.";
 
 export function ContactForm() {
   const [form, setForm] = useState<FormState>({
@@ -38,14 +79,10 @@ export function ContactForm() {
       if (response.ok) {
         setSubmissionState("success");
         setForm({ name: "", email: "", message: "" });
-      } else if (response.status === 422) {
-        // Formspree rate limit / validation error
-        setSubmissionState("fallback");
       } else {
         setSubmissionState("fallback");
       }
     } catch {
-      // Network error
       setSubmissionState("fallback");
     }
   };
@@ -57,87 +94,36 @@ export function ContactForm() {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
+  // Success — single message, no form
   if (submissionState === "success") {
     return (
-      <div className="contact-output space-y-4" role="region" aria-label="Contact form">
-        <div className="text-purple-400 font-bold text-lg">
-          ┌ Contact ──────────────────────────────┐
-        </div>
-        <div className="pl-2 text-lime-400 font-bold">
-          ✓ Thank you for your message! I&#39;ll get back to you soon.
-        </div>
-        <div className="text-gray-500 pl-2">
-          └─────────────────────────────────────────┘
-        </div>
-      </div>
+      <BoxContainer>
+        <div className="pl-2 text-lime-400 font-bold">{SUCCESS_MESSAGE}</div>
+      </BoxContainer>
     );
   }
 
+  // Fallback — direct links when form delivery fails
   if (submissionState === "fallback") {
     return (
-      <div className="contact-output space-y-4" role="region" aria-label="Contact form">
-        <div className="text-purple-400 font-bold text-lg">
-          ┌ Contact ──────────────────────────────┐
-        </div>
+      <BoxContainer>
         <div className="pl-2 text-amber-400">
           Message delivery unavailable. Reach me directly:
         </div>
-        <div className="pl-2 space-y-1">
-          <Link
-            href="https://github.com/zbloss"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-lime-400 font-bold hover:text-lime-300 underline underline-offset-2 block"
-          >
-            ─ GitHub
-          </Link>
-          <Link
-            href="https://linkedin.com/in/zbloss"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-lime-400 font-bold hover:text-lime-300 underline underline-offset-2 block"
-          >
-            ─ LinkedIn
-          </Link>
-        </div>
-        <div className="text-gray-500 pl-2">
-          └─────────────────────────────────────────┘
-        </div>
-      </div>
+        <ContactLinks />
+      </BoxContainer>
     );
   }
 
+  // Default — full form with direct links above it
   return (
-    <div className="contact-output space-y-4" role="region" aria-label="Contact form">
-      <div className="text-purple-400 font-bold text-lg">
-        ┌ Contact ──────────────────────────────┐
-      </div>
+    <BoxContainer>
       <div className="pl-2 text-gray-400 mb-2">
         Prefer to reach me directly?
       </div>
-      <div className="pl-2 space-y-1 mb-3">
-        <Link
-          href="https://github.com/zbloss"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-lime-400 font-bold hover:text-lime-300 underline underline-offset-2 block"
-        >
-          ─ GitHub
-        </Link>
-        <Link
-          href="https://linkedin.com/in/zbloss"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-lime-400 font-bold hover:text-lime-300 underline underline-offset-2 block"
-        >
-          ─ LinkedIn
-        </Link>
-      </div>
+      <ContactLinks />
       <form onSubmit={handleSubmit} className="space-y-3">
-        <div>
-          <label htmlFor="name" className="text-lime-400 font-bold block mb-1">
-            Name
-          </label>
+        <Field label="Name" id="name">
           <input
             type="text"
             id="name"
@@ -145,13 +131,10 @@ export function ContactForm() {
             value={form.name}
             onChange={handleInputChange}
             required
-            className="w-full bg-gray-900 border border-purple-700 text-green-400 px-3 py-2 rounded focus:outline-none focus:border-lime-500"
+            className={inputClasses}
           />
-        </div>
-        <div>
-          <label htmlFor="email" className="text-lime-400 font-bold block mb-1">
-            Email
-          </label>
+        </Field>
+        <Field label="Email" id="email">
           <input
             type="email"
             id="email"
@@ -159,13 +142,10 @@ export function ContactForm() {
             value={form.email}
             onChange={handleInputChange}
             required
-            className="w-full bg-gray-900 border border-purple-700 text-green-400 px-3 py-2 rounded focus:outline-none focus:border-lime-500"
+            className={inputClasses}
           />
-        </div>
-        <div>
-          <label htmlFor="message" className="text-lime-400 font-bold block mb-1">
-            Message
-          </label>
+        </Field>
+        <Field label="Message" id="message">
           <textarea
             id="message"
             name="message"
@@ -173,9 +153,9 @@ export function ContactForm() {
             onChange={handleInputChange}
             required
             rows={4}
-            className="w-full bg-gray-900 border border-purple-700 text-green-400 px-3 py-2 rounded focus:outline-none focus:border-lime-500"
+            className={inputClasses}
           />
-        </div>
+        </Field>
         <button
           type="submit"
           disabled={submissionState === "submitting"}
@@ -184,9 +164,45 @@ export function ContactForm() {
           {submissionState === "submitting" ? "Sending..." : "Send Message"}
         </button>
       </form>
-      <div className="text-gray-500 pl-2">
-        └─────────────────────────────────────────┘
-      </div>
+    </BoxContainer>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Inline helpers — keep JSX tree flat and readable
+// ---------------------------------------------------------------------------
+
+function BoxContainer({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="contact-output space-y-4" role="region" aria-label="Contact form">
+      <div className={BOX_CLASS}>{BOX_HEADER}</div>
+      {children}
+      <div className={FOOTER_CLASS}>{BOX_FOOTER}</div>
+    </div>
+  );
+}
+
+const inputClasses =
+  "w-full bg-gray-900 border border-purple-700 text-green-400 px-3 py-2 rounded focus:outline-none focus:border-lime-500";
+
+function Field({
+  label,
+  id,
+  children,
+}: {
+  label: string;
+  id: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div>
+      <label
+        htmlFor={id}
+        className="text-lime-400 font-bold block mb-1"
+      >
+        {label}
+      </label>
+      {children}
     </div>
   );
 }
