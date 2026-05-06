@@ -29,15 +29,22 @@ export const KNOWN_COMMANDS: CommandDefinition[] = [
 ];
 
 /**
+ * Normalize a command string for comparison: strip the leading `/` and lowercase.
+ * " /help" → "help", " /Projects" → "projects"
+ */
+function normalizeCommand(input: string): string {
+  return input.trim().toLowerCase().replace(/^\//, "");
+}
+
+/**
  * Find a command definition matching the trimmed input (case-insensitive, ignoring the leading `/`).
  */
 function findCommand(
   commands: CommandDefinition[],
   trimmed: string,
 ): CommandDefinition | undefined {
-  return commands.find(
-    (c) => c.command.slice(1).toLowerCase() === trimmed.slice(1).toLowerCase(),
-  );
+  const normalizedInput = normalizeCommand(trimmed);
+  return commands.find((c) => normalizeCommand(c.command) === normalizedInput);
 }
 
 /** Resolve a raw input string to a CommandResult. */
@@ -66,6 +73,7 @@ export function resolveCommand(input: string): CommandResult {
 
 const HIGH_CONFIDENCE_THRESHOLD = 0.85;
 const MID_CONFIDENCE_THRESHOLD = 0.50;
+const NO_MATCH_MESSAGE = "I'm not sure what you mean — try /help to see available commands";
 
 /**
  * Resolve a CommandDefinition to a CommandResult based on its action/route.
@@ -115,10 +123,7 @@ export async function resolveCommandAsync(
   const intentResult = await resolver.resolve(trimmed);
 
   if (!intentResult) {
-    return {
-      type: "stub",
-      message: "I'm not sure what you mean — try /help to see available commands",
-    };
+    return { type: "stub", message: NO_MATCH_MESSAGE };
   }
 
   if (intentResult.confidence >= HIGH_CONFIDENCE_THRESHOLD) {
@@ -139,9 +144,6 @@ export async function resolveCommandAsync(
     };
   }
 
-  return {
-    type: "stub",
-    message: "I'm not sure what you mean — try /help to see available commands",
-  };
+  return { type: "stub", message: NO_MATCH_MESSAGE };
 }
 

@@ -47,7 +47,7 @@ export function cosineSimilarity(a: number[], b: number[]): number {
  * Used as a fallback when Transformers.js cannot load (tests, offline).
  * Creates a fixed-length vector based on character trigrams.
  */
-function wordBagEmbedding(text: string, dim: number = 64): number[] {
+function wordBagEmbedding(text: string, dim: number): number[] {
   const vec = new Array(dim).fill(0);
   const normalized = text.toLowerCase().trim();
   // Use character n-grams for a simple but meaningful embedding
@@ -79,10 +79,12 @@ const MODEL_ID = "Xenova/all-MiniLM-L6-v2";
 const EMBEDDING_DIM = 384;
 const DEFAULT_MODEL_LOAD_DELAY_MS = 3000;
 
-/** Override model load delay — set via vitest globals in tests. */
-const MODEL_LOAD_DELAY_MS = typeof window !== "undefined"
-  ? ((window as unknown as Record<string, unknown>)["__MODEL_LOAD_DELAY_MS__"] as number) ?? DEFAULT_MODEL_LOAD_DELAY_MS
-  : DEFAULT_MODEL_LOAD_DELAY_MS;
+/** Override model load delay — set via `window.__MODEL_LOAD_DELAY_MS__` in tests. */
+const MODEL_LOAD_DELAY_MS =
+  typeof window !== "undefined" &&
+  typeof (window as Record<string, unknown>)["__MODEL_LOAD_DELAY_MS__"] === "number"
+    ? (window as Record<string, unknown>)["__MODEL_LOAD_DELAY_MS__"] as number
+    : DEFAULT_MODEL_LOAD_DELAY_MS;
 
 export class IntentResolver {
   private commands: CommandDefinition[];

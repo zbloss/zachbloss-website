@@ -84,7 +84,6 @@ export function formatHumanDate(raw: string): string {
  * Handles repos with fewer than 3 commits gracefully.
  */
 export function getRecentCommits(): Commit[] {
-
   try {
     // Porcelain format: one-line hash, author, date per entry, "---" separator
     const output = execSync(
