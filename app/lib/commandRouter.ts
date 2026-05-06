@@ -26,6 +26,18 @@ export const KNOWN_COMMANDS: CommandDefinition[] = [
   { command: "/clear", description: "Clear terminal output", action: "clear" },
 ];
 
+/**
+ * Find a command definition by its trimmed, lowercased name.
+ */
+function findCommand(
+  commands: CommandDefinition[],
+  trimmed: string,
+): CommandDefinition | undefined {
+  return commands.find(
+    (c) => c.command.slice(1).toLowerCase() === trimmed.slice(1).toLowerCase(),
+  );
+}
+
 /** Resolve a raw input string to a CommandResult. */
 export function resolveCommand(input: string): CommandResult {
   const trimmed = input.trim();
@@ -39,9 +51,7 @@ export function resolveCommand(input: string): CommandResult {
     };
   }
 
-  const cmd = trimmed.slice(1).toLowerCase();
-
-  const found = KNOWN_COMMANDS.find((c) => c.command.slice(1).toLowerCase() === cmd);
+  const found = findCommand(KNOWN_COMMANDS, trimmed);
 
   if (!found) {
     return { type: "error", message: `Unknown command: ${trimmed}` };
@@ -102,10 +112,7 @@ export async function resolveCommandAsync(
 
   // Fast path: known commands resolve synchronously
   if (trimmed.startsWith("/")) {
-    const cmd = trimmed.slice(1).toLowerCase();
-    const found = commands.find(
-      (c) => c.command.slice(1).toLowerCase() === cmd,
-    );
+    const found = findCommand(commands, trimmed);
     if (found) {
       return commandToResult(found);
     }

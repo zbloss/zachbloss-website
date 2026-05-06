@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { resolveCommand, resolveCommandAsync } from "@/app/lib/commandRouter";
+import { resolveCommand, resolveCommandAsync, CommandResult } from "@/app/lib/commandRouter";
 import { TerminalPrompt } from "@/app/components/TerminalPrompt";
 import { AssistantStatus } from "@/app/components/AssistantStatus";
 import { KNOWN_COMMANDS } from "@/app/lib/commandRouter";
@@ -22,6 +22,26 @@ export function TerminalLayout({ children }: TerminalLayoutProps) {
     inputRef.current?.focus();
   });
 
+  // Apply a CommandResult — navigate, clear, or display a message.
+  const applyResult = useCallback(
+    (result: CommandResult) => {
+      switch (result.type) {
+        case "navigate":
+          router.push(result.route);
+          break;
+        case "clear":
+          router.push("/clear");
+          break;
+        case "suggest":
+        case "stub":
+        case "error":
+          setMessage(result.message);
+          break;
+      }
+    },
+    [router, setMessage],
+  );
+
   const handleCommand = useCallback(async (command: string) => {
     const trimmed = command.trim();
 
@@ -31,46 +51,21 @@ export function TerminalLayout({ children }: TerminalLayoutProps) {
       return;
     }
 
-    // Fast path: known commands resolve synchronously
-    const syncResult = resolveCommand(trimmed);
-    if (syncResult.type === "navigate" || syncResult.type === "clear") {
-      setHistory((prev) => [...prev, command]);
-      setHistoryIndex(-1);
-      switch (syncResult.type) {
-        case "navigate":
-          router.push(syncResult.route);
-          break;
-        case "clear":
-          router.push("/clear");
-          break;
-      }
-      return;
-    }
-
-    // Unknown commands → async resolution with IntentResolver wiring
-    const result = await resolveCommandAsync(trimmed, KNOWN_COMMANDS);
-
+    // Always record the command in history before processing
     setHistory((prev) => [...prev, command]);
     setHistoryIndex(-1);
 
-    switch (result.type) {
-      case "navigate":
-        router.push(result.route);
-        break;
-      case "clear":
-        router.push("/clear");
-        break;
-      case "suggest":
-        setMessage(result.message);
-        break;
-      case "stub":
-        setMessage(result.message);
-        break;
-      case "error":
-        setMessage(result.message);
-        break;
+    // Fast path: known commands resolve synchronously
+    const syncResult = resolveCommand(trimmed);
+    if (syncResult.type === "navigate" || syncResult.type === "clear") {
+      applyResult(syncResult);
+      return;
     }
-  }, [router]);
+
+    // Slow path: IntentResolver for plain text and unknown commands
+    const result = await resolveCommandAsync(trimmed, KNOWN_COMMANDS);
+    applyResult(result);
+  }, [applyResult]);
 
   return (
     <div className="terminal-layout font-mono min-h-screen bg-black text-green-400 p-4 flex flex-col">

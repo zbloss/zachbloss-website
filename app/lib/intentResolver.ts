@@ -172,7 +172,6 @@ export class IntentResolver {
   /** Use Transformers.js pipeline if available. */
   private async modelEmbedding(text: string): Promise<number[]> {
     // Dynamic import — only loads in browser context
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { pipeline } = await import("@xenova/transformers");
     try {
       const embedder = await pipeline("feature-extraction", MODEL_ID);
