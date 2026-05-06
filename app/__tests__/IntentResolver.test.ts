@@ -1,6 +1,14 @@
 /// <reference types="vitest/globals" />
 
-import { cosineSimilarity, IntentResolver, resolve } from "@/app/lib/intentResolver";
+import { vi } from "vitest";
+import { cosineSimilarity, IntentResolver, resolve, wordBagEmbedding } from "@/app/lib/intentResolver";
+import { KNOWN_COMMANDS } from "@/app/lib/commandRouter";
+
+// Make @xenova/transformers fail immediately in tests so word-bag fallback
+// is used without network access or long waits.
+vi.mock("@xenova/transformers", () => ({
+  pipeline: vi.fn().mockRejectedValue(new Error("model not available in tests")),
+}));
 
 // ---------------------------------------------------------------------------
 // Cosine similarity tests
@@ -344,4 +352,200 @@ describe("resolve() convenience function", () => {
   it("exports a convenience function that wraps IntentResolver", () => {
     expect(typeof resolve).toBe("function");
   });
+});
+
+// ---------------------------------------------------------------------------
+// wordBagEmbedding export
+// ---------------------------------------------------------------------------
+
+describe("wordBagEmbedding", () => {
+  it("is exported from intentResolver", () => {
+    expect(typeof wordBagEmbedding).toBe("function");
+  });
+
+  it("returns a normalized vector of the specified dimension", () => {
+    const vec = wordBagEmbedding("hello world", 10);
+    expect(vec).toHaveLength(10);
+    const norm = Math.sqrt(vec.reduce((s, v) => s + v * v, 0));
+    expect(norm).toBeCloseTo(1.0, 4);
+  });
+
+  it("same text always produces similarity = 1.0 with itself", () => {
+    const a = wordBagEmbedding("projects", 384);
+    const b = wordBagEmbedding("projects", 384);
+    expect(cosineSimilarity(a, b)).toBeCloseTo(1.0);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Multi-anchor word-bag quality — ticket examples
+// ---------------------------------------------------------------------------
+//
+// These tests verify that obvious user inputs reach ≥ 0.85 similarity against
+// at least one of the alias anchor texts defined in KNOWN_COMMANDS, using the
+// word-bag embedding. They run synchronously against the embedding function
+// directly, so model loading is not involved.
+//
+// If you add a new obvious input that should auto-navigate, add it here AND
+// add the matching alias to KNOWN_COMMANDS in commandRouter.ts.
+// ---------------------------------------------------------------------------
+
+describe("multi-anchor word-bag quality — obvious inputs reach ≥ 0.85", () => {
+  const DIM = 384;
+
+  function maxAnchorSim(input: string, anchors: string[]): number {
+    const inputEmb = wordBagEmbedding(input, DIM);
+    return Math.max(...anchors.map((a) => cosineSimilarity(inputEmb, wordBagEmbedding(a, DIM))));
+  }
+
+  function anchorsFor(command: string): string[] {
+    const cmd = KNOWN_COMMANDS.find((c) => c.command === command);
+    if (!cmd) throw new Error(`Command ${command} not found in KNOWN_COMMANDS`);
+    return [
+      cmd.command.slice(1),
+      cmd.description,
+      ...(cmd.aliases ?? []),
+    ].filter(Boolean);
+  }
+
+  // --- Ticket examples ---
+
+  it('"projects" reaches ≥ 0.85 against /projects anchors', () => {
+    expect(maxAnchorSim("projects", anchorsFor("/projects"))).toBeGreaterThanOrEqual(0.85);
+  });
+
+  it('"show me projects" reaches ≥ 0.85 against /projects anchors', () => {
+    expect(maxAnchorSim("show me projects", anchorsFor("/projects"))).toBeGreaterThanOrEqual(0.85);
+  });
+
+  it('"help" reaches ≥ 0.85 against /help anchors', () => {
+    expect(maxAnchorSim("help", anchorsFor("/help"))).toBeGreaterThanOrEqual(0.85);
+  });
+
+  it('"blog" reaches ≥ 0.85 against /blog anchors', () => {
+    expect(maxAnchorSim("blog", anchorsFor("/blog"))).toBeGreaterThanOrEqual(0.85);
+  });
+
+  it('"show me blog posts" reaches ≥ 0.85 against /blog anchors', () => {
+    expect(maxAnchorSim("show me blog posts", anchorsFor("/blog"))).toBeGreaterThanOrEqual(0.85);
+  });
+
+  // --- Additional obvious inputs for each page ---
+
+  it('"about" reaches ≥ 0.85 against /about anchors', () => {
+    expect(maxAnchorSim("about", anchorsFor("/about"))).toBeGreaterThanOrEqual(0.85);
+  });
+
+  it('"about me" reaches ≥ 0.85 against /about anchors', () => {
+    expect(maxAnchorSim("about me", anchorsFor("/about"))).toBeGreaterThanOrEqual(0.85);
+  });
+
+  it('"who are you" reaches ≥ 0.85 against /about anchors', () => {
+    expect(maxAnchorSim("who are you", anchorsFor("/about"))).toBeGreaterThanOrEqual(0.85);
+  });
+
+  it('"certifications" reaches ≥ 0.85 against /certifications anchors', () => {
+    expect(maxAnchorSim("certifications", anchorsFor("/certifications"))).toBeGreaterThanOrEqual(0.85);
+  });
+
+  it('"certs" reaches ≥ 0.85 against /certifications anchors', () => {
+    expect(maxAnchorSim("certs", anchorsFor("/certifications"))).toBeGreaterThanOrEqual(0.85);
+  });
+
+  it('"certificates" reaches ≥ 0.85 against /certifications anchors', () => {
+    expect(maxAnchorSim("certificates", anchorsFor("/certifications"))).toBeGreaterThanOrEqual(0.85);
+  });
+
+  it('"contact" reaches ≥ 0.85 against /contact anchors', () => {
+    expect(maxAnchorSim("contact", anchorsFor("/contact"))).toBeGreaterThanOrEqual(0.85);
+  });
+
+  it('"contact me" reaches ≥ 0.85 against /contact anchors', () => {
+    expect(maxAnchorSim("contact me", anchorsFor("/contact"))).toBeGreaterThanOrEqual(0.85);
+  });
+
+  it('"get in touch" reaches ≥ 0.85 against /contact anchors', () => {
+    expect(maxAnchorSim("get in touch", anchorsFor("/contact"))).toBeGreaterThanOrEqual(0.85);
+  });
+
+  it('"latest" reaches ≥ 0.85 against /latest anchors', () => {
+    expect(maxAnchorSim("latest", anchorsFor("/latest"))).toBeGreaterThanOrEqual(0.85);
+  });
+
+  it('"recent commits" reaches ≥ 0.85 against /latest anchors', () => {
+    expect(maxAnchorSim("recent commits", anchorsFor("/latest"))).toBeGreaterThanOrEqual(0.85);
+  });
+
+  it('"commits" reaches ≥ 0.85 against /latest anchors', () => {
+    expect(maxAnchorSim("commits", anchorsFor("/latest"))).toBeGreaterThanOrEqual(0.85);
+  });
+
+  it('"clear" reaches ≥ 0.85 against /clear anchors', () => {
+    expect(maxAnchorSim("clear", anchorsFor("/clear"))).toBeGreaterThanOrEqual(0.85);
+  });
+
+  it('"clear screen" reaches ≥ 0.85 against /clear anchors', () => {
+    expect(maxAnchorSim("clear screen", anchorsFor("/clear"))).toBeGreaterThanOrEqual(0.85);
+  });
+
+  it('"home" reaches ≥ 0.85 against /home anchors', () => {
+    expect(maxAnchorSim("home", anchorsFor("/home"))).toBeGreaterThanOrEqual(0.85);
+  });
+
+  it('"homepage" reaches ≥ 0.85 against /home anchors', () => {
+    expect(maxAnchorSim("homepage", anchorsFor("/home"))).toBeGreaterThanOrEqual(0.85);
+  });
+
+  it('"portfolio" reaches ≥ 0.85 against /projects anchors', () => {
+    expect(maxAnchorSim("portfolio", anchorsFor("/projects"))).toBeGreaterThanOrEqual(0.85);
+  });
+
+  it('"commands" reaches ≥ 0.85 against /help anchors', () => {
+    expect(maxAnchorSim("commands", anchorsFor("/help"))).toBeGreaterThanOrEqual(0.85);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// End-to-end routing with word-bag fallback — ticket examples against KNOWN_COMMANDS
+// ---------------------------------------------------------------------------
+//
+// These tests run the full IntentResolver flow (loadDelay=0, @xenova mocked
+// to fail → word-bag fallback) against the real KNOWN_COMMANDS configuration.
+// They assert that obvious inputs route to the correct command with confidence
+// ≥ 0.85 (auto-navigate threshold).
+// ---------------------------------------------------------------------------
+
+describe("end-to-end word-bag routing — ticket examples (KNOWN_COMMANDS)", () => {
+  it.each([
+    // Ticket examples
+    ["projects", "/projects"],
+    ["show me projects", "/projects"],
+    ["help", "/help"],
+    ["blog", "/blog"],
+    ["show me blog posts", "/blog"],
+    // Additional obvious inputs per page
+    ["about", "/about"],
+    ["about me", "/about"],
+    ["who are you", "/about"],
+    ["certifications", "/certifications"],
+    ["certs", "/certifications"],
+    ["contact", "/contact"],
+    ["contact me", "/contact"],
+    ["get in touch", "/contact"],
+    ["latest", "/latest"],
+    ["recent commits", "/latest"],
+    ["clear", "/clear"],
+    ["clear screen", "/clear"],
+    ["home", "/home"],
+    ["portfolio", "/projects"],
+    ["commands", "/help"],
+  ] as [string, string][])(
+    '"%s" resolves to %s with confidence ≥ 0.85',
+    async (input, expectedCommand) => {
+      const resolver = new IntentResolver(KNOWN_COMMANDS, 0);
+      const result = await resolver.resolve(input);
+      expect(result?.command).toBe(expectedCommand);
+      expect(result?.confidence).toBeGreaterThanOrEqual(0.85);
+    }
+  );
 });

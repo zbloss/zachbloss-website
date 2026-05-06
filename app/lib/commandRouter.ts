@@ -19,15 +19,60 @@ export type CommandResult =
  * Each entry maps to a URL route (or a special action).
  */
 export const KNOWN_COMMANDS: CommandDefinition[] = [
-  { command: "/home", description: "Return to the home page", route: "/" },
-  { command: "/help", description: "Show available commands", route: "/help" },
-  { command: "/about", description: "View background and skills", route: "/about" },
-  { command: "/projects", description: "View portfolio projects", route: "/projects" },
-  { command: "/certifications", description: "View professional certifications", route: "/certifications" },
-  { command: "/blog", description: "View blog posts", route: "/blog" },
-  { command: "/latest", description: "View recent commits", route: "/latest" },
-  { command: "/contact", description: "Get in touch via message form", route: "/contact" },
-  { command: "/clear", description: "Clear terminal output", action: "clear" },
+  {
+    command: "/home",
+    description: "Return to the home page",
+    route: "/",
+    aliases: ["home", "homepage", "main", "index", "start", "go home", "return home", "back to home"],
+  },
+  {
+    command: "/help",
+    description: "Show available commands",
+    route: "/help",
+    aliases: ["help", "commands", "list commands", "what can you do", "options", "show commands", "show me commands", "available commands"],
+  },
+  {
+    command: "/about",
+    description: "View background and skills",
+    route: "/about",
+    aliases: ["about", "about me", "about you", "who are you", "background", "skills", "bio", "tell me about yourself", "introduce yourself"],
+  },
+  {
+    command: "/projects",
+    description: "View portfolio projects",
+    route: "/projects",
+    aliases: ["projects", "portfolio", "work", "show projects", "show me projects", "what have you built", "your projects", "view projects"],
+  },
+  {
+    command: "/certifications",
+    description: "View professional certifications",
+    route: "/certifications",
+    aliases: ["certifications", "certificates", "certs", "credentials", "qualifications", "show certifications", "show certs", "your certifications"],
+  },
+  {
+    command: "/blog",
+    description: "View blog posts",
+    route: "/blog",
+    aliases: ["blog", "blog posts", "posts", "articles", "writing", "show blog", "show me blog", "show me blog posts", "your blog", "view blog"],
+  },
+  {
+    command: "/latest",
+    description: "View recent commits",
+    route: "/latest",
+    aliases: ["latest", "recent", "commits", "recent commits", "git commits", "updates", "show latest", "show commits", "what's new"],
+  },
+  {
+    command: "/contact",
+    description: "Get in touch via message form",
+    route: "/contact",
+    aliases: ["contact", "contact me", "get in touch", "message", "email", "reach out", "send a message", "contact form", "reach me"],
+  },
+  {
+    command: "/clear",
+    description: "Clear terminal output",
+    action: "clear",
+    aliases: ["clear", "clear screen", "reset", "clean", "clear terminal", "wipe", "clear the screen", "cls"],
+  },
 ];
 
 /**

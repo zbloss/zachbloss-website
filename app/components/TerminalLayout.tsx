@@ -76,7 +76,8 @@ export function TerminalLayout({ children }: TerminalLayoutProps) {
         </span>
       </div>
 
-      <div role="log" className="overflow-y-auto flex-grow p-2 min-h-[calc(100vh-80px)]">
+      <div role="log" className="overflow-y-auto flex-grow p-2 flex flex-col">
+        <div className="flex-grow" />
         {children}
         {message && (
           <div className="text-gray-400 mt-2" aria-live="polite">

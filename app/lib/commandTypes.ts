@@ -10,4 +10,6 @@ export interface CommandDefinition {
   description: string;
   route?: string;
   action?: "clear";
+  /** Plain-text phrases users might type that should map to this command. */
+  aliases?: string[];
 }

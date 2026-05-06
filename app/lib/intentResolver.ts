@@ -5,7 +5,9 @@
  * to the closest Command via cosine similarity.
  *
  * Model loading begins 3 seconds after page load via low-priority background fetch.
- * Command embeddings are pre-computed at init time (not per query).
+ * With the real model, one embedding is computed per command from all anchor texts.
+ * With the word-bag fallback, one embedding is computed per anchor text, and the
+ * resolver takes the maximum similarity across all anchors per command.
  */
 
 import type { CommandDefinition } from "./commandTypes";
@@ -47,23 +49,38 @@ export function cosineSimilarity(a: number[], b: number[]): number {
  * Used as a fallback when Transformers.js cannot load (tests, offline).
  * Creates a fixed-length vector based on character trigrams.
  */
-function wordBagEmbedding(text: string, dim: number): number[] {
+export function wordBagEmbedding(text: string, dim: number): number[] {
   const vec = new Array(dim).fill(0);
   const normalized = text.toLowerCase().trim();
-  // Use character n-grams for a simple but meaningful embedding
   const n = 3;
   for (let i = 0; i <= normalized.length - n; i++) {
     const gram = normalized.substring(i, i + n);
-    // Hash the n-gram to a vector index
     let hash = 0;
     for (let j = 0; j < gram.length; j++) {
       hash = (hash * 31 + gram.charCodeAt(j)) % dim;
     }
     vec[hash] += 1;
   }
-  // L2 normalize
   const norm = Math.sqrt(vec.reduce((s, v) => s + v * v, 0)) || 1;
   return vec.map((v) => v / norm);
+}
+
+// ---------------------------------------------------------------------------
+// Anchor text builder
+// ---------------------------------------------------------------------------
+
+/**
+ * Build the list of anchor texts for a command.
+ * Includes the bare command name, description, and all aliases.
+ * Used to build per-anchor word-bag embeddings (fallback) and
+ * the concatenated text for the real model.
+ */
+function buildAnchorTexts(cmd: CommandDefinition): string[] {
+  return [
+    cmd.command.slice(1), // command name without /
+    cmd.description,
+    ...(cmd.aliases ?? []),
+  ].filter(Boolean);
 }
 
 // ---------------------------------------------------------------------------
@@ -88,14 +105,21 @@ const MODEL_LOAD_DELAY_MS =
 
 export class IntentResolver {
   private commands: CommandDefinition[];
-  private embeddings: Map<string, number[]> = new Map();
+  /**
+   * Multiple anchor embeddings per command.
+   * Real model: [[single embedding from concatenated text]].
+   * Word-bag fallback: [[emb_anchor1], [emb_anchor2], ...].
+   */
+  private anchorEmbeddings: Map<string, number[][]> = new Map();
   private modelReady: boolean = false;
   private modelPromise: Promise<void> | null = null;
   private loadDelay: number;
+  /** True after model fails to load — input embeddings use word-bag directly. */
+  private usingWordBagFallback: boolean = false;
 
   /** Injected mock embedding function — used in tests. */
   private mockInputEmbedding: ((text: string) => number[]) | null = null;
-  /** Pre-set command embeddings for tests. */
+  /** Pre-set command embeddings for tests (single vector per command). */
   private mockCommandEmbeddings: Map<string, number[]> | null = null;
 
   constructor(commands: CommandDefinition[], loadDelay?: number) {
@@ -131,7 +155,6 @@ export class IntentResolver {
    *   < 0.50 → try /help
    */
   async resolve(input: string): Promise<IntentResult | null> {
-    // Wait for model if not ready yet
     if (this.modelPromise) {
       await this.modelPromise;
     }
@@ -141,40 +164,54 @@ export class IntentResolver {
     let bestCommand: IntentResult | null = null;
 
     for (const cmd of this.commands) {
-      const cmdEmbedding = this.getCommandEmbedding(cmd.command, cmd.description);
-      const confidence = cosineSimilarity(inputEmbedding, cmdEmbedding);
-
-      if (confidence > 0 && (!bestCommand || confidence > bestCommand.confidence)) {
-        bestCommand = { command: cmd.command, confidence };
+      const anchors = this.getCommandAnchors(cmd);
+      let maxConfidence = 0;
+      for (const anchor of anchors) {
+        const sim = cosineSimilarity(inputEmbedding, anchor);
+        if (sim > maxConfidence) maxConfidence = sim;
+      }
+      if (maxConfidence > 0 && (!bestCommand || maxConfidence > bestCommand.confidence)) {
+        bestCommand = { command: cmd.command, confidence: maxConfidence };
       }
     }
 
     return bestCommand;
   }
 
-  /** Get embedding for input text — mock, model, or word-bag fallback. */
+  /** Get embedding for input text — mock, model, word-bag fallback, or on-the-fly. */
   private async getInputEmbedding(text: string): Promise<number[]> {
     if (this.mockInputEmbedding) {
       return this.mockInputEmbedding(text);
     }
-    if (this.modelReady && this.embeddings.size > 0) {
+    if (this.usingWordBagFallback) {
+      return wordBagEmbedding(text, EMBEDDING_DIM);
+    }
+    if (this.modelReady && this.anchorEmbeddings.size > 0) {
       return this.modelEmbedding(text);
     }
     return wordBagEmbedding(text, EMBEDDING_DIM);
   }
 
-  /** Get cached command embedding — mock if injected, model cache, or word-bag fallback. */
-  private getCommandEmbedding(command: string, description: string): number[] {
-    if (this.mockCommandEmbeddings && this.mockCommandEmbeddings.has(command)) {
-      return this.mockCommandEmbeddings.get(command)!;
+  /**
+   * Get anchor embeddings for a command.
+   * Mock: wraps the single mock vector in an array.
+   * Real/fallback: returns all pre-computed anchor embeddings.
+   * On-the-fly: computes word-bag for each anchor text (safety net).
+   */
+  private getCommandAnchors(cmd: CommandDefinition): number[][] {
+    if (this.mockCommandEmbeddings && this.mockCommandEmbeddings.has(cmd.command)) {
+      return [this.mockCommandEmbeddings.get(cmd.command)!];
     }
-    return this.embeddings.get(command) || wordBagEmbedding(description || command, EMBEDDING_DIM);
+    if (this.anchorEmbeddings.has(cmd.command)) {
+      return this.anchorEmbeddings.get(cmd.command)!;
+    }
+    return buildAnchorTexts(cmd).map((t) => wordBagEmbedding(t, EMBEDDING_DIM));
   }
 
   /** Use Transformers.js pipeline if available. */
   private async modelEmbedding(text: string): Promise<number[]> {
-    const { pipeline } = await import("@xenova/transformers");
     try {
+      const { pipeline } = await import("@xenova/transformers");
       const embedder = await pipeline("feature-extraction", MODEL_ID);
       const output = await embedder(text, { pooling: "mean", normalize: true });
       const data = output.data as number[];
@@ -185,38 +222,41 @@ export class IntentResolver {
   }
 
   /**
-   * Initialize the model: start loading after a 3-second delay,
+   * Initialize the model: start loading after a delay,
    * pre-compute embeddings for all commands.
+   *
+   * Real model: one embedding per command from concatenated anchor texts.
+   * Fallback: one word-bag embedding per anchor text per command.
    */
   private async initModel(): Promise<void> {
-    // Schedule model loading after a delay to avoid blocking page render
     await new Promise((resolve) => setTimeout(resolve, this.loadDelay));
 
     try {
       const { pipeline } = await import("@xenova/transformers");
       const embedder = await pipeline("feature-extraction", MODEL_ID);
 
-      // Pre-compute embeddings for each command description
       for (const cmd of this.commands) {
-        const text = cmd.description || cmd.command;
+        const text = buildAnchorTexts(cmd).join(" ");
         const output = await embedder(text, { pooling: "mean", normalize: true });
         const data = output.data as number[];
-        this.embeddings.set(cmd.command, Array.from(data));
+        this.anchorEmbeddings.set(cmd.command, [Array.from(data)]);
       }
 
       this.modelReady = true;
     } catch {
-      // Model failed to load — fall back to word-bag embeddings
-      this.modelReady = true;
+      // Model failed to load — use per-anchor word-bag embeddings.
+      // Each anchor is embedded separately so short inputs match their
+      // exact alias rather than competing against the full description.
+      this.usingWordBagFallback = true;
       for (const cmd of this.commands) {
-        const text = cmd.description || cmd.command;
-        this.embeddings.set(cmd.command, wordBagEmbedding(text, EMBEDDING_DIM));
+        const anchors = buildAnchorTexts(cmd).map((t) => wordBagEmbedding(t, EMBEDDING_DIM));
+        this.anchorEmbeddings.set(cmd.command, anchors);
       }
+      this.modelReady = true;
     }
 
     this.modelPromise = null;
   }
-
 }
 
 // ---------------------------------------------------------------------------
