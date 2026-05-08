@@ -2,6 +2,23 @@ import '@testing-library/jest-dom'
 import { vi } from 'vitest'
 import * as nextNavigation from 'next/navigation'
 
+// Provide window.matchMedia for tests (jsdom does not include it by default)
+if (!window.matchMedia) {
+  Object.defineProperty(window, 'matchMedia', {
+    writable: true,
+    value: vi.fn().mockImplementation((query: string) => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    })),
+  })
+}
+
 // Mock next/navigation for all tests
 vi.mock('next/navigation', async () => {
   const actual = await vi.importActual<typeof nextNavigation>('next/navigation')

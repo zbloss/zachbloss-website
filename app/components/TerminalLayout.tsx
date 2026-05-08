@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { resolveCommand, resolveCommandAsync, CommandResult } from "@/app/lib/commandRouter";
 import { TerminalPrompt } from "@/app/components/TerminalPrompt";
 import { AssistantStatus } from "@/app/components/AssistantStatus";
+import { MobileCommandShortcuts } from "@/app/components/MobileCommandShortcuts";
 import { KNOWN_COMMANDS } from "@/app/lib/commandRouter";
 
 interface TerminalLayoutProps {
@@ -17,6 +18,16 @@ export function TerminalLayout({ children }: TerminalLayoutProps) {
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [message, setMessage] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Detect mobile viewport using matchMedia (SSR-safe via useEffect).
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 768px)");
+    setIsMobile(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -87,6 +98,7 @@ export function TerminalLayout({ children }: TerminalLayoutProps) {
       </div>
 
       <div className="border-b-2 border-lime-500 p-2">
+        <MobileCommandShortcuts onCommand={handleCommand} isMobile={isMobile} />
         <TerminalPrompt
           onCommand={handleCommand}
           history={history}
