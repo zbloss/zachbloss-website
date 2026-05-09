@@ -55,12 +55,12 @@ export const KNOWN_COMMANDS: CommandDefinition[] = [
     route: "/blog",
     aliases: ["blog", "blog posts", "posts", "articles", "writing", "show blog", "show me blog", "show me blog posts", "your blog", "view blog"],
   },
-  {
-    command: "/latest",
-    description: "View recent commits",
-    route: "/latest",
-    aliases: ["latest", "recent", "commits", "recent commits", "git commits", "updates", "show latest", "show commits", "what's new"],
-  },
+  // {
+  //   command: "/latest",
+  //   description: "View recent commits",
+  //   route: "/latest",
+  //   aliases: ["latest", "recent", "commits", "recent commits", "git commits", "updates", "show latest", "show commits", "what's new"],
+  // },
   {
     command: "/contact",
     description: "Get in touch via message form",

@@ -4,18 +4,10 @@ import { KNOWN_COMMANDS } from "@/app/lib/commandRouter";
 
 interface MobileCommandShortcutsProps {
   onCommand: (command: string) => void;
-  isMobile?: boolean;
 }
 
-/** Command shortcut buttons for mobile viewports. */
-export function MobileCommandShortcuts({
-  onCommand,
-  isMobile = false,
-}: MobileCommandShortcutsProps) {
-  if (!isMobile) {
-    return null;
-  }
-
+/** Command shortcut bar displayed above the terminal prompt. */
+export function MobileCommandShortcuts({ onCommand }: MobileCommandShortcutsProps) {
   return (
     <div className="mobile-shortcut-row overflow-x-auto flex gap-2 p-2 whitespace-nowrap">
       {KNOWN_COMMANDS.map((cmd) => (

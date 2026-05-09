@@ -42,11 +42,13 @@ Refactor the site into a terminal user interface (TUI) themed experience — vis
 ### Modules
 
 **TerminalLayout** (shared across all routes)
+
 - Renders the terminal chrome: Boot Sequence on initial load, Terminal Body (scrollable output), Terminal Prompt (text input), Assistant Status indicator
 - Manages Command History in memory (↑/↓ navigation), not persisted across page loads
 - On mobile: renders MobileCommandShortcuts row above the Terminal Prompt
 
 **CommandRouter**
+
 - Receives raw input from the Terminal Prompt
 - If input starts with `/` and matches a known command: navigate to that route
 - If input starts with `/` and is unknown: delegate to IntentResolver
@@ -54,6 +56,7 @@ Refactor the site into a terminal user interface (TUI) themed experience — vis
 - Applies IntentResolver confidence thresholds: ≥0.85 auto-navigate, 0.50–0.84 print suggestion and await Enter confirmation, <0.50 print "try /help"
 
 **IntentResolver**
+
 - Wraps `Xenova/all-MiniLM-L6-v2` via Transformers.js
 - Loads model via low-priority background fetch starting 3 seconds after page load
 - Pre-computes embeddings for all Command descriptions at init time
@@ -61,10 +64,12 @@ Refactor the site into a terminal user interface (TUI) themed experience — vis
 - Interface: `resolve(input: string) => Promise<{ command: string; confidence: number } | null>`
 
 **BootSequence**
+
 - Purely presentational, renders on first load only
 - Prints: site name, tagline, 1–2 lines, then `hint: run /help to see all available commands`
 
 **RichTerminalComponents** (one per command)
+
 - `HelpOutput` — table of commands and descriptions
 - `AboutOutput` — skills section (Generative AI, Data Science, Analytics)
 - `ProjectCard` — project title, description, image, link; ASCII border
@@ -76,16 +81,19 @@ Refactor the site into a terminal user interface (TUI) themed experience — vis
 - `MobileCommandShortcuts` — row of tappable buttons for all commands
 
 **ContactForm**
+
 - Submits to Formspree (free tier, 50 submissions/month)
 - On HTTP 422 (rate limit) or network error: display graceful fallback directing visitor to GitHub and LinkedIn
 - Uses standard fetch POST with JSON body
 
 **BlogPostLoader** (build-time)
+
 - Reads `posts/*.md` at Next.js build time
 - Parses frontmatter (title, date, slug, excerpt) and markdown body
 - Returns typed `Post[]` used by `/blog` and `/blog/[slug]` routes
 
 **LatestCommitsLoader** (build-time)
+
 - Runs `git log` at Next.js build time
 - Formats 3 most recent commits: human-readable date + message
 - Exports as static data consumed by `/latest` route
@@ -100,29 +108,30 @@ Refactor the site into a terminal user interface (TUI) themed experience — vis
 
 ### Routing
 
-| Command | Route |
-|---|---|
-| `/help` | `/help` |
-| `/about` | `/about` |
-| `/projects` | `/projects` |
-| `/certifications` | `/certifications` |
-| `/blog` | `/blog` |
-| `/blog [slug]` | `/blog/[slug]` |
-| `/contact` | `/contact` |
-| `/latest` | `/latest` |
-| `/clear` | clears Terminal Body, stays on current route |
+| Command           | Route                                        |
+| ----------------- | -------------------------------------------- |
+| `/help`           | `/help`                                      |
+| `/about`          | `/about`                                     |
+| `/projects`       | `/projects`                                  |
+| `/certifications` | `/certifications`                            |
+| `/blog`           | `/blog`                                      |
+| `/blog [slug]`    | `/blog/[slug]`                               |
+| `/contact`        | `/contact`                                   |
+| `/clear`          | clears Terminal Body, stays on current route |
 
 ## Testing Decisions
 
 A good test verifies observable behavior from the outside — what a user or caller sees — not internal implementation details. Tests should not assert on class names, internal state, or private methods.
 
 **IntentResolver** — unit tests covering:
+
 - High-confidence input correctly returns the expected command above 0.85 threshold
 - Low-confidence input returns null or a below-threshold result
 - Model initialization completes and embeddings are available before `resolve()` is called
 - Edge cases: empty string, single character, input that is itself a valid command
 
 **CommandRouter** — unit tests covering:
+
 - Known `/command` input triggers correct route navigation
 - Unknown `/command` delegates to IntentResolver
 - Plain-text input (no `/` prefix) always delegates to IntentResolver
@@ -131,12 +140,14 @@ A good test verifies observable behavior from the outside — what a user or cal
 - Low-confidence result prints "try /help"
 
 **BlogPostLoader** — unit tests covering:
+
 - Reads and parses a valid markdown file with frontmatter correctly
 - Returns posts sorted by date descending
 - Handles an empty `posts/` directory (returns empty array, no crash)
 - Handles malformed frontmatter gracefully
 
 **LatestCommitsLoader** — unit tests covering:
+
 - Parses `git log` output into correctly structured commit objects
 - Returns exactly 3 entries even when more commits exist
 - Handles repos with fewer than 3 commits

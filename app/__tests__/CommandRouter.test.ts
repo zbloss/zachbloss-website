@@ -40,13 +40,13 @@ describe("resolveCommand", () => {
       }
     });
 
-    it("resolves /latest to the latest route", () => {
-      const result = resolveCommand("/latest");
-      expect(result.type).toBe("navigate");
-      if (result.type === "navigate") {
-        expect(result.route).toBe("/latest");
-      }
-    });
+    // it("resolves /latest to the latest route", () => {
+    //   const result = resolveCommand("/latest");
+    //   expect(result.type).toBe("navigate");
+    //   if (result.type === "navigate") {
+    //     expect(result.route).toBe("/latest");
+    //   }
+    // });
 
     it("resolves /contact to the contact route", () => {
       const result = resolveCommand("/contact");

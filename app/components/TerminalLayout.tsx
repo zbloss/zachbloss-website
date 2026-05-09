@@ -18,15 +18,6 @@ export function TerminalLayout({ children }: TerminalLayoutProps) {
   const [message, setMessage] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const [isMobile, setIsMobile] = useState(false);
-  useEffect(() => {
-    const mq = window.matchMedia("(max-width: 768px)");
-    setIsMobile(mq.matches);
-    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
-    mq.addEventListener("change", handler);
-    return () => mq.removeEventListener("change", handler);
-  }, []);
-
   useEffect(() => {
     inputRef.current?.focus();
   });
@@ -71,7 +62,7 @@ export function TerminalLayout({ children }: TerminalLayoutProps) {
   }, [applyResult]);
 
   return (
-    <div className="terminal-layout font-mono min-h-screen bg-black text-green-400 p-4 flex flex-col">
+    <div className="terminal-layout font-mono h-screen overflow-hidden bg-black text-green-400 p-4 flex flex-col">
       <div className="border-t-2 border-lime-500">
         ┌ Terminal ── zachbloss.com ──┐
         <span className="float-right">
@@ -90,7 +81,7 @@ export function TerminalLayout({ children }: TerminalLayoutProps) {
       </div>
 
       <div className="border-b-2 border-lime-500 p-2">
-        <MobileCommandShortcuts onCommand={handleCommand} isMobile={isMobile} />
+        <MobileCommandShortcuts onCommand={handleCommand} />
         <TerminalPrompt
           onCommand={handleCommand}
           history={history}
