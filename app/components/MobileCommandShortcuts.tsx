@@ -3,17 +3,11 @@
 import { KNOWN_COMMANDS } from "@/app/lib/commandRouter";
 
 interface MobileCommandShortcutsProps {
-  /** Called with the command string when a shortcut button is tapped. */
   onCommand: (command: string) => void;
-  /** Whether the current viewport is mobile-sized. When false, nothing renders. */
   isMobile?: boolean;
 }
 
-/**
- * Renders a horizontally scrollable row of command shortcut buttons.
- * Only visible on mobile viewports (controlled by `isMobile` prop).
- * Each button triggers `onCommand` with the corresponding command string.
- */
+/** Command shortcut buttons for mobile viewports. */
 export function MobileCommandShortcuts({
   onCommand,
   isMobile = false,

@@ -1,14 +1,12 @@
 "use client";
 
-import { useState, useRef, useEffect, KeyboardEvent, RefObject } from "react";
+import { useState, useRef, KeyboardEvent, RefObject } from "react";
 
 interface TerminalPromptProps {
   /** Called with the trimmed command string when Enter is pressed. */
   onCommand: (command: string) => void;
   /** History of previously entered commands for this session. */
   history: string[];
-  /** Current index in the history (−1 = at prompt, not browsing). */
-  historyIndex: number;
   /** Optional ref to forward to the input element. */
   inputRef?: RefObject<HTMLInputElement>;
 }
@@ -16,29 +14,18 @@ interface TerminalPromptProps {
 export function TerminalPrompt({
   onCommand,
   history,
-  historyIndex,
   inputRef,
 }: TerminalPromptProps) {
-  // Reset browsing mode when historyIndex changes externally.
-  useEffect(() => {
-    if (historyIndex >= 0) {
-      setBrowseOffset(0);
-      setTypedValue("");
-    }
-  }, [historyIndex]);
-
   const [browseOffset, setBrowseOffset] = useState(0);
   const [typedValue, setTypedValue] = useState("");
   const localInputRef = useRef<HTMLInputElement>(null);
   const ref = inputRef || localInputRef;
 
-  // The text currently displayed in the input field.
-  let displayValue = "";
-  if (typedValue) {
-    displayValue = typedValue;
-  } else if (browseOffset > 0 && browseOffset <= history.length) {
-    displayValue = history[history.length - browseOffset];
-  }
+  const displayValue =
+    typedValue ||
+    (browseOffset > 0 && browseOffset <= history.length
+      ? history[history.length - browseOffset]
+      : "");
 
   function handleSubmit() {
     const trimmed = displayValue.trim();

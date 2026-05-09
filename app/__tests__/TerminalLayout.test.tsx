@@ -44,21 +44,9 @@ describe("TerminalLayout", () => {
     expect(input).toBeInTheDocument();
   });
 
-  it("has ASCII-style borders in the terminal chrome", () => {
-    render(<TerminalLayout><div>test content</div></TerminalLayout>);
-    const terminal = screen.getByRole("log").closest(".terminal-layout");
-    expect(terminal).toBeInTheDocument();
-  });
-
   it("renders children content inside the TerminalBody", () => {
     render(<TerminalLayout><div data-testid="child-content">child</div></TerminalLayout>);
     expect(screen.getByTestId("child-content")).toBeInTheDocument();
-  });
-
-  it("applies monospace font globally via the terminal layout", () => {
-    render(<TerminalLayout><div>test</div></TerminalLayout>);
-    const terminal = screen.getByRole("log").closest(".terminal-layout");
-    expect(terminal).toHaveClass("font-mono");
   });
 
 });

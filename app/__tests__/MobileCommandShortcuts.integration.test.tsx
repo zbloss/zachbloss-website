@@ -4,6 +4,7 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import { TerminalLayout } from "@/app/components/TerminalLayout";
 import { vi } from "vitest";
+import { useRouter } from "next/navigation";
 
 // Mock matchMedia for mobile detection
 Object.defineProperty(window, "matchMedia", {
@@ -20,9 +21,22 @@ Object.defineProperty(window, "matchMedia", {
   })),
 });
 
+// Mock Next.js router
+vi.mock("next/navigation", async () => ({
+  useRouter: vi.fn().mockReturnValue({
+    push: vi.fn(),
+    replace: vi.fn(),
+    prefetch: vi.fn(),
+    back: vi.fn(),
+    forward: vi.fn(),
+    refresh: vi.fn(),
+  }),
+  usePathname: vi.fn().mockReturnValue("/"),
+  useSearchParams: vi.fn().mockReturnValue(new URLSearchParams()),
+}));
+
 describe("MobileCommandShortcuts integration with TerminalLayout", () => {
-  it("renders MobileCommandShortcuts above TerminalPrompt when on mobile", () => {
-    // Set matchMedia to return mobile
+  it("renders shortcut buttons above TerminalPrompt when on mobile", () => {
     vi.mocked(window.matchMedia).mockImplementation((query) => ({
       matches: query.includes("(max-width: 768px)"),
       media: query,
@@ -36,12 +50,11 @@ describe("MobileCommandShortcuts integration with TerminalLayout", () => {
 
     render(<TerminalLayout><div>content</div></TerminalLayout>);
 
-    // The shortcut row should be present
-    expect(document.querySelector(".mobile-shortcut-row")).toBeInTheDocument();
+    // Shortcut buttons are present when mobile
+    expect(screen.getByText("/help")).toBeInTheDocument();
   });
 
-  it("does not render MobileCommandShortcuts when not on mobile", () => {
-    // Set matchMedia to NOT return mobile
+  it("does not render shortcut buttons when not on mobile", () => {
     vi.mocked(window.matchMedia).mockImplementation((query) => ({
       matches: false,
       media: query,
@@ -55,11 +68,11 @@ describe("MobileCommandShortcuts integration with TerminalLayout", () => {
 
     render(<TerminalLayout><div>content</div></TerminalLayout>);
 
-    // The shortcut row should NOT be present
-    expect(document.querySelector(".mobile-shortcut-row")).not.toBeInTheDocument();
+    // Shortcut buttons are absent when not mobile
+    expect(screen.queryByText("/help")).not.toBeInTheDocument();
   });
 
-  it("shortcut buttons trigger the same command flow as typing", () => {
+  it("shortcut buttons trigger navigation via router.push", () => {
     vi.mocked(window.matchMedia).mockImplementation((query) => ({
       matches: true,
       media: query,
@@ -71,6 +84,8 @@ describe("MobileCommandShortcuts integration with TerminalLayout", () => {
       dispatchEvent: vi.fn(),
     }));
 
+    const { push } = vi.mocked(useRouter());
+
     render(<TerminalLayout><div>content</div></TerminalLayout>);
 
     // Click a shortcut button
@@ -78,6 +93,6 @@ describe("MobileCommandShortcuts integration with TerminalLayout", () => {
     fireEvent.click(helpButton);
 
     // Should navigate to /help
-    expect(document.querySelector("a[href='/help']") || document.querySelector("[data-route='/help']") || true).toBeDefined();
+    expect(push).toHaveBeenCalledWith("/help");
   });
 });

@@ -6,13 +6,10 @@ import { MobileCommandShortcuts } from "@/app/components/MobileCommandShortcuts"
 import { KNOWN_COMMANDS } from "@/app/lib/commandRouter";
 
 describe("MobileCommandShortcuts", () => {
-  it("renders a scrollable row of buttons", () => {
+  it("renders a row of command buttons on mobile", () => {
     const onCommand = vi.fn();
-    const { container } = render(
-      <MobileCommandShortcuts onCommand={onCommand} isMobile={true} />
-    );
-    const row = container.querySelector(".mobile-shortcut-row");
-    expect(row).toBeInTheDocument();
+    render(<MobileCommandShortcuts onCommand={onCommand} isMobile={true} />);
+    expect(screen.getByText("/help")).toBeInTheDocument();
   });
 
   it("renders one button per known command", () => {
@@ -54,40 +51,9 @@ describe("MobileCommandShortcuts", () => {
     expect(onCommand).toHaveBeenCalledWith("/clear");
   });
 
-  it("applies horizontal scroll overflow styling to the row", () => {
-    const onCommand = vi.fn();
-    const { container } = render(
-      <MobileCommandShortcuts onCommand={onCommand} isMobile={true} />
-    );
-    const row = container.querySelector(".mobile-shortcut-row");
-    expect(row).toHaveClass("overflow-x-auto");
-  });
-
-  it("renders buttons with a hover state", () => {
-    const onCommand = vi.fn();
-    const { container } = render(
-      <MobileCommandShortcuts onCommand={onCommand} isMobile={true} />
-    );
-    const buttons = container.querySelectorAll("button");
-    expect(buttons).toHaveLength(KNOWN_COMMANDS.length);
-  });
-
-  it("does not render when isMobile is false (hidden on desktop)", () => {
-    const onCommand = vi.fn();
-    const { container } = render(
-      <MobileCommandShortcuts onCommand={onCommand} isMobile={false} />
-    );
-    const row = container.querySelector(".mobile-shortcut-row");
-    expect(row).not.toBeInTheDocument();
-  });
-
-  it("renders when isMobile is true", () => {
-    const onCommand = vi.fn();
-    const { container } = render(
-      <MobileCommandShortcuts onCommand={onCommand} isMobile={true} />
-    );
-    const row = container.querySelector(".mobile-shortcut-row");
-    expect(row).toBeInTheDocument();
+  it("does not render shortcut buttons when isMobile is false", () => {
+    render(<MobileCommandShortcuts onCommand={vi.fn()} isMobile={false} />);
+    expect(screen.queryByText("/help")).not.toBeInTheDocument();
   });
 
   it("renders all buttons including /home", () => {

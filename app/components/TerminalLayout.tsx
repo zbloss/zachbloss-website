@@ -15,11 +15,9 @@ interface TerminalLayoutProps {
 export function TerminalLayout({ children }: TerminalLayoutProps) {
   const router = useRouter();
   const [history, setHistory] = useState<string[]>([]);
-  const [historyIndex, setHistoryIndex] = useState(-1);
   const [message, setMessage] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Detect mobile viewport using matchMedia (SSR-safe via useEffect).
   const [isMobile, setIsMobile] = useState(false);
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 768px)");
@@ -33,7 +31,6 @@ export function TerminalLayout({ children }: TerminalLayoutProps) {
     inputRef.current?.focus();
   });
 
-  // Apply a CommandResult — navigate, clear, or display a message.
   const applyResult = useCallback(
     (result: CommandResult) => {
       switch (result.type) {
@@ -56,24 +53,19 @@ export function TerminalLayout({ children }: TerminalLayoutProps) {
   const handleCommand = useCallback(async (command: string) => {
     const trimmed = command.trim();
 
-    // Empty input → clear message
     if (!trimmed) {
       setMessage(null);
       return;
     }
 
-    // Always record the command in history before processing
     setHistory((prev) => [...prev, command]);
-    setHistoryIndex(-1);
 
-    // Fast path: known commands resolve synchronously
     const syncResult = resolveCommand(trimmed);
     if (syncResult.type === "navigate" || syncResult.type === "clear") {
       applyResult(syncResult);
       return;
     }
 
-    // Slow path: IntentResolver for plain text and unknown commands
     const result = await resolveCommandAsync(trimmed, KNOWN_COMMANDS);
     applyResult(result);
   }, [applyResult]);
@@ -102,7 +94,6 @@ export function TerminalLayout({ children }: TerminalLayoutProps) {
         <TerminalPrompt
           onCommand={handleCommand}
           history={history}
-          historyIndex={historyIndex}
           inputRef={inputRef}
         />
       </div>

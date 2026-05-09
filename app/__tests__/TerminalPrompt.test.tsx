@@ -6,19 +6,19 @@ import { TerminalPrompt } from "@/app/components/TerminalPrompt";
 
 describe("TerminalPrompt", () => {
   it("renders the prompt character ❯", () => {
-    render(<TerminalPrompt onCommand={() => {}} history={[]} historyIndex={0} />);
+    render(<TerminalPrompt onCommand={() => {}} history={[]} />);
     expect(screen.getByText("❯")).toBeInTheDocument();
   });
 
   it("renders a text input field", () => {
-    render(<TerminalPrompt onCommand={() => {}} history={[]} historyIndex={0} />);
+    render(<TerminalPrompt onCommand={() => {}} history={[]} />);
     const input = screen.getByRole("textbox");
     expect(input).toBeInTheDocument();
   });
 
   it("calls onCommand with the input value when Enter is pressed", () => {
     const onCommand = vi.fn();
-    render(<TerminalPrompt onCommand={onCommand} history={[]} historyIndex={0} />);
+    render(<TerminalPrompt onCommand={onCommand} history={[]} />);
     const input = screen.getByRole("textbox");
 
     fireEvent.change(input, { target: { value: "/help" } });
@@ -29,7 +29,7 @@ describe("TerminalPrompt", () => {
 
   it("calls onCommand with trimmed input value", () => {
     const onCommand = vi.fn();
-    render(<TerminalPrompt onCommand={onCommand} history={[]} historyIndex={0} />);
+    render(<TerminalPrompt onCommand={onCommand} history={[]} />);
     const input = screen.getByRole("textbox");
 
     fireEvent.change(input, { target: { value: "  /clear  " } });
@@ -40,7 +40,7 @@ describe("TerminalPrompt", () => {
 
   it("does not call onCommand for empty input", () => {
     const onCommand = vi.fn();
-    render(<TerminalPrompt onCommand={onCommand} history={[]} historyIndex={0} />);
+    render(<TerminalPrompt onCommand={onCommand} history={[]} />);
     const input = screen.getByRole("textbox");
 
     fireEvent.keyDown(input, { key: "Enter" });
@@ -55,7 +55,7 @@ describe("TerminalPrompt", () => {
       <TerminalPrompt
         onCommand={onCommand}
         history={history}
-        historyIndex={-1}
+       
       />
     );
     const input = screen.getByRole("textbox");
@@ -73,7 +73,7 @@ describe("TerminalPrompt", () => {
       <TerminalPrompt
         onCommand={onCommand}
         history={history}
-        historyIndex={-1}
+       
       />
     );
     const input = screen.getByRole("textbox");
@@ -93,7 +93,7 @@ describe("TerminalPrompt", () => {
       <TerminalPrompt
         onCommand={onCommand}
         history={history}
-        historyIndex={-1}
+       
       />
     );
     const input = screen.getByRole("textbox");
