@@ -32,7 +32,7 @@ export function CertCard({ certification }: CertCardProps) {
           >
             ─ {certification.title}
           </Link>
-          <p className="text-gray-300 text-sm leading-relaxed">
+          <p className="text-gray-300 text-sm leading-relaxed break-words">
             {certification.description}
           </p>
         </div>

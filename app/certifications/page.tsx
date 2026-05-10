@@ -5,8 +5,8 @@ import certificationsData from "@/public/data/certifications.json";
 export default function CertificationsPage() {
   return (
     <TerminalLayout>
-      <div className="certifications-output space-y-2" role="region" aria-label="Certifications">
-        <div className="text-purple-400 font-bold text-lg">
+      <div className="certifications-output space-y-2 overflow-hidden" role="region" aria-label="Certifications">
+        <div className="text-purple-400 font-bold text-lg truncate">
           ┌ Certifications ─────────────────────────┐
         </div>
         <div className="pl-2">
@@ -14,7 +14,7 @@ export default function CertificationsPage() {
             <CertCard key={index} certification={cert} />
           ))}
         </div>
-        <div className="text-gray-500 pl-2">
+        <div className="text-gray-500 pl-2 truncate">
           └──────────────────────────────────────────┘
         </div>
       </div>

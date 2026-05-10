@@ -99,8 +99,8 @@ const mdComponents: Components = {
 
 export function BlogPostView({ post }: BlogPostViewProps) {
   return (
-    <div className="blog-post-output space-y-2" role="region" aria-label={post.title}>
-      <div className="text-purple-400 font-bold text-lg">
+    <div className="blog-post-output space-y-2 overflow-hidden" role="region" aria-label={post.title}>
+      <div className="text-purple-400 font-bold text-lg truncate">
         ┌ {post.title} ─────────────────────────────┐
       </div>
       <div className="pl-2">
@@ -123,7 +123,7 @@ export function BlogPostView({ post }: BlogPostViewProps) {
           </Link>
         </div>
       </div>
-      <div className="text-gray-500 pl-2">
+      <div className="text-gray-500 pl-2 truncate">
         └───────────────────────────────────────────┘
       </div>
     </div>

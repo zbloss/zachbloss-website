@@ -63,11 +63,9 @@ export function TerminalLayout({ children }: TerminalLayoutProps) {
 
   return (
     <div className="terminal-layout font-mono h-screen overflow-hidden bg-black text-green-400 p-4 flex flex-col">
-      <div className="border-t-2 border-lime-500">
-        ┌ Terminal ── zachbloss.com ──┐
-        <span className="float-right">
-          <AssistantStatus />
-        </span>
+      <div className="border-t-2 border-lime-500 flex items-center justify-between truncate px-1">
+        <span className="shrink-0">┌ Terminal ── zachbloss.com ──┐</span>
+        <AssistantStatus />
       </div>
 
       <div role="log" className="overflow-y-auto flex-grow p-2 flex flex-col">

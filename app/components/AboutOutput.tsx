@@ -4,8 +4,8 @@ import aboutData from "@/public/data/about.json";
 
 export function AboutOutput() {
   return (
-    <div className="about-output space-y-4" role="region" aria-label="About Zachary Bloss">
-      <div className="text-purple-400 font-bold text-lg">
+    <div className="about-output space-y-4 overflow-hidden" role="region" aria-label="About Zachary Bloss">
+      <div className="text-purple-400 font-bold text-lg truncate">
         ┌ About ─────────────────────────────────────┐
       </div>
       <div className="pl-2 space-y-3">
@@ -25,7 +25,7 @@ export function AboutOutput() {
           </div>
         ))}
       </div>
-      <div className="text-gray-500 pl-2">
+      <div className="text-gray-500 pl-2 truncate">
         └─────────────────────────────────────────────┘
       </div>
     </div>

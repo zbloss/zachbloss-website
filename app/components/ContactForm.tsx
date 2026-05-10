@@ -9,8 +9,8 @@ import Link from "next/link";
 
 const BOX_HEADER = "┌ Contact ──────────────────────────────┐";
 const BOX_FOOTER = "└─────────────────────────────────────────┘";
-const BOX_CLASS = "text-purple-400 font-bold text-lg";
-const FOOTER_CLASS = "text-gray-500 pl-2";
+const BOX_CLASS = "text-purple-400 font-bold text-lg truncate";
+const FOOTER_CLASS = "text-gray-500 pl-2 truncate";
 const LINK_CLASS =
   "text-lime-400 font-bold hover:text-lime-300 underline underline-offset-2 block";
 
@@ -174,7 +174,7 @@ export function ContactForm() {
 
 function BoxContainer({ children }: { children: React.ReactNode }) {
   return (
-    <div className="contact-output space-y-4" role="region" aria-label="Contact form">
+    <div className="contact-output space-y-4 overflow-hidden" role="region" aria-label="Contact form">
       <div className={BOX_CLASS}>{BOX_HEADER}</div>
       {children}
       <div className={FOOTER_CLASS}>{BOX_FOOTER}</div>
