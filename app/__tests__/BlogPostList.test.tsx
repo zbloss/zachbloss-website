@@ -36,7 +36,7 @@ describe("BlogPostList", () => {
     render(<BlogPostList posts={mockPosts} />);
     const links = screen.getAllByRole("link");
     expect(links.length).toBeGreaterThanOrEqual(2);
-    const hrefs = links.map((l) => l.getAttribute("href"));
+    const hrefs = links.map((l: HTMLElement) => l.getAttribute("href"));
     expect(hrefs).toContain("/blog/first-post");
     expect(hrefs).toContain("/blog/second-post");
   });
