@@ -43,5 +43,3 @@ This is a modern, responsive personal portfolio website built with Next.js, Reac
 ## Building and Deployment
 
 The project uses GitHub Actions for automated build and deployment. The workflow is defined in `.github/workflows/build_and_deploy.yaml`.
-
-To manually build the project:
