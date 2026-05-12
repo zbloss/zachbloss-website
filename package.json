@@ -10,7 +10,6 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
-    "postinstall": "patch-package",
     "sandcastle": "npx tsx ./.sandcastle/main.mts"
   },
   "dependencies": {
@@ -45,7 +44,6 @@
     "eslint-config-next": "14.2.13",
     "jsdom": "^24.1.0",
     "langfuse": "^3.38.20",
-    "patch-package": "^8.0.1",
     "postcss": "^8",
     "shadcn-ui": "^0.9.1",
     "tailwindcss": "^3.4.1",
